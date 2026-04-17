@@ -43,7 +43,7 @@ const LandingPage = () => {
                 <div className="relative flex items-center justify-between h-20 w-full max-w-7xl px-6">
                     {/* Logo */}
                     <div className="flex items-center gap-2">
-                        <Image src="/dark-theme-logo.svg" alt="logo" loading={"eager"} width={140} height={45} className="w-auto h-8 md:h-10" />
+                        <Image src="/LogoTextDark.svg" alt="logo" loading={"eager"} width={140} height={45} className="w-auto h-8 md:h-10" />
                     </div>
 
                     {/* Navigation */}
@@ -55,11 +55,11 @@ const LandingPage = () => {
 
                     {/* Right buttons */}
                     <div className="flex items-center gap-3">
-                        <Link href="/auth" className="hidden sm:block px-5 py-2.5 rounded-xl bg-transparent text-gray-700 hover:bg-gray-100 transition cursor-pointer font-semibold text-sm">
+                        <Link href="/auth/login" className="hidden sm:block px-5 py-2.5 rounded-xl bg-transparent text-gray-700 hover:bg-gray-100 transition cursor-pointer font-semibold text-sm">
                             Sign In
                         </Link>
 
-                        <Link href="/auth" className="px-5 py-2.5 rounded-xl bg-theme-blue text-white cursor-pointer font-semibold text-sm hover:opacity-90 transition shadow-lg shadow-blue-900/20">
+                        <Link href="/auth/register" className="px-5 py-2.5 rounded-xl bg-theme-blue text-white cursor-pointer font-semibold text-sm hover:opacity-90 transition shadow-lg shadow-blue-900/20">
                             Get Started
                         </Link>
                     </div>
@@ -85,13 +85,13 @@ const LandingPage = () => {
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                       <Link
-                        href="/auth"
+                        href="/auth/register"
                         className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-theme-blue flex items-center justify-center text-white font-bold text-lg hover:shadow-xl hover:shadow-blue-900/30 transition-all cursor-pointer text-center"
                       >
-                        Set Up Your Barangay <ChevronRight className="ml-3" />
+                        Register Now <ChevronRight className="ml-3" />
                       </Link>
                       <Link
-                        href="/auth"
+                        href="/auth/login"
                         className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-theme-white text-gray-700 border border-gray-200 font-bold text-lg hover:bg-gray-50 transition cursor-pointer text-center"
                       >
                         Sign In to Dashboard
@@ -181,7 +181,7 @@ const LandingPage = () => {
                 </Section>
 
                 {/* How It Works Section */}
-                <Section id="how-it-works" className="bg-gray-50/50 border-y border-gray-100">
+                <Section id="how-it-works" className="bg-gray-50/50">
                     <div className="flex flex-col items-center mb-14 text-center">
                         <span className="text-sm font-semibold uppercase tracking-widest text-theme-blue">How It Works</span>
                         <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mt-3 mb-4 leading-tight">
@@ -234,7 +234,7 @@ const LandingPage = () => {
                     </div>
                 </Section>
 
-                <Section id="about" className="bg-gray-50/50 border-y border-gray-100">
+                <Section id="about" className="bg-gray-50/50">
                     <div className="flex flex-col items-center text-center max-w-3xl mx-auto gap-6">
                         <div>
                             <span className="text-sm font-semibold uppercase tracking-widest text-theme-blue">About the Platform</span>
