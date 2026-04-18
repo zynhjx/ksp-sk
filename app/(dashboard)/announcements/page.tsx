@@ -105,7 +105,7 @@ const Announcements = () => {
       <div className="flex flex-col mb-8">
         <div className="flex mb-6">
           <div className="flex flex-col space-y-1">
-            <h1 className="font-bold text-3xl text-theme-dark-blue">
+            <h1 className="font-bold text-3xl text-theme-blue">
               Announcements
             </h1>
             <p className="text-gray-500">

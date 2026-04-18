@@ -167,21 +167,21 @@ const Suggestions = () => {
       <div className="flex flex-col mb-8">
         <div className="flex mb-6">
           <div className="flex flex-col space-y-1">
-            <h1 className="font-bold text-3xl text-theme-dark-blue">Community Suggestions</h1>
+            <h1 className="font-bold text-3xl text-theme-blue">Community Suggestions</h1>
             <p className="text-gray-500">Share our ideas and feedback to help improve programs and services in your barangay</p>
           </div>
 
           <div className="ml-auto flex items-center">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <button className="bg-theme-dark-blue text-theme-white px-5 py-2 rounded-md">
+                <button className="bg-theme-blue text-theme-white px-5 py-2 rounded-md">
                   + Add Suggestion
                 </button>
               </DialogTrigger>
 
               <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                  <DialogTitle className="text-xl font-bold text-theme-dark-blue">
+                  <DialogTitle className="text-xl font-bold text-theme-blue">
                     Submit a Suggestion
                   </DialogTitle>
                   <DialogDescription>
@@ -274,7 +274,7 @@ const Suggestions = () => {
                   <Button
                     onClick={handleSubmit}
                     disabled={!isValid}
-                    className="bg-theme-dark-blue text-white hover:bg-theme-dark-blue/90"
+                    className="bg-theme-blue text-white hover:bg-theme-blue/90"
                   >
                     Submit Suggestion
                   </Button>

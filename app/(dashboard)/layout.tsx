@@ -27,6 +27,7 @@ async function getUser(): Promise<User | null> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_EXPRESS_API_URL}/api/auth/me`, {
       headers: {
         Cookie: `accessToken=${token.value}`,
+        "x-app-type": "sk",
       },
       cache: "no-store",
     })
@@ -48,7 +49,7 @@ const Layout = async ({children}: {children: ReactNode} ) => {
     <AuthProvider initialUser={user}>
       <div className="w-screen h-screen bg-theme-white flex">
         <SidebarProvider>
-          <Sidebar type={"youth"}/>
+          <Sidebar/>
           <main className="pt-25 md:pt-6 md:ml-18 xl:ml-0 bg-theme-white flex-1 p-8 overflow-y-scroll">
             <Overlay/>
             <MobileHeader/>

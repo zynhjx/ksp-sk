@@ -10,6 +10,8 @@ import Button from '@/components/Button';
 import { toast } from 'sonner';
 import { motion } from "framer-motion"
 import { redirect, useRouter } from 'next/navigation';
+import { Checkbox } from "@/components/ui/checkbox"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 
 
 // type RegisterPageProps = {
@@ -19,12 +21,14 @@ import { redirect, useRouter } from 'next/navigation';
 type StepOneProps = {
   email: string;
   setEmail: (v: string) => void;
+  agreed: boolean
+  setAgreed: (v: boolean) => void
   isFormValid: boolean;
   sending: boolean;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-const StepOne = ({handleSubmit, email, setEmail, isFormValid, sending}: StepOneProps) => {
+const StepOne = ({handleSubmit, email, agreed, setAgreed, setEmail, isFormValid, sending}: StepOneProps) => {
     return (
       <motion.form 
         initial={{x: 10, opacity: 0}}
@@ -32,7 +36,7 @@ const StepOne = ({handleSubmit, email, setEmail, isFormValid, sending}: StepOneP
         exit={{x:-10, opacity: 0}}
         transition={{ duration: 0.5 }}
         onSubmit={handleSubmit} className='space-y-4'>
-        <AuthCardTitle title={"Sign in to continue"} />
+        <AuthCardTitle title={"Sign Up as SK Official"} />
 
         <FormInput
           value={email}
@@ -42,8 +46,6 @@ const StepOne = ({handleSubmit, email, setEmail, isFormValid, sending}: StepOneP
           placeholder={"john@example.com"}
           label={"Email Address"} />
 
-        
-
         <Button
           type="submit"
           primary
@@ -52,7 +54,7 @@ const StepOne = ({handleSubmit, email, setEmail, isFormValid, sending}: StepOneP
           {sending ? "Sending OTP..." : "Continue"}
         </Button>
 
-        <div className="mt-5 px-2 text-sm text-gray-600 text-center leading-relaxed">
+        {/* <div className="mt-5 px-2 text-sm text-gray-600 text-center leading-relaxed">
           By continuing, you agree to our{" "}
           <Link href="/terms" target="_blank" rel="noopener noreferrer" className="hover:underline text-theme-blue">
             Terms of Use
@@ -61,7 +63,33 @@ const StepOne = ({handleSubmit, email, setEmail, isFormValid, sending}: StepOneP
           <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:underline text-theme-blue">
             Privacy Policy
           </Link>.
-        </div>        
+        </div> */}
+
+        <FieldGroup className="px-2">
+          <Field orientation="horizontal">
+            <Checkbox id="terms-checkbox-basic" name="terms-checkbox-basic" checked={agreed} onCheckedChange={setAgreed}
+              className='
+              data-[state=checked]:bg-theme-blue
+              data-[state=checked]:border-theme-blue
+              data-[state=checked]:text-white
+              hover:cursor-pointer
+              '
+            />
+            <FieldLabel htmlFor="terms-checkbox-basic" className='text-sm text-gray-600 gap-0'>
+              <div className="text-sm text-gray-600 text-center leading-relaxed">
+                I agree to the{" "}
+                <Link href="/terms" target="_blank" rel="noopener noreferrer" className="hover:underline text-theme-blue">
+                  Terms of Use
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:underline text-theme-blue">
+                  Privacy Policy
+                </Link>.
+              </div>
+            </FieldLabel>
+          </Field>
+        </FieldGroup>
+        <AuthCardFooter type='register'/>
 
       </motion.form>
     )
@@ -141,6 +169,7 @@ const StepOne = ({handleSubmit, email, setEmail, isFormValid, sending}: StepOneP
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("")
+  const [agreed, setAgreed] = useState(false)
   const [sending, setSending] = useState(false)
   const [step, setStep] = useState(1)
   const [countdown, setCountdown] = useState(0)
@@ -148,11 +177,11 @@ const RegisterPage = () => {
 	const [invalid, setInvalid] = useState(false)
 	const [success, setSuccess] = useState(false)
 	const [pendingResend, setPendingResend] = useState(false)
-  const roleRedirectMap: Record<string, string> = {
-    admin: "/admin/dashboard",
-    sk: "/admin/dashboard",
-    youth: "/youth/home", // or "/"
-  };
+  // const roleRedirectMap: Record<string, string> = {
+  //   admin: "/admin/dashboard",
+  //   sk: "/admin/dashboard",
+  //   youth: "/youth/home", // or "/"
+  // };
 
   const router = useRouter()
 
@@ -170,13 +199,18 @@ const RegisterPage = () => {
 		setPendingResend(true)
 		try {
 			const res = await fetch(`${process.env.NEXT_PUBLIC_EXPRESS_API_URL}/api/auth/register/email/resend`, {
-        credentials: "include"
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-app-type": "sk",
+        },
+        body: JSON.stringify({ email }),
       }
       );
 
       if (!res.ok) {
         const errorData = await res.json();
-        toast.error(errorData?.message || "Something went wrong.");
+        toast.error(errorData?.message || "Something went wrong.", { position: "top-center"});
         return; 
       }
 
@@ -202,27 +236,27 @@ const RegisterPage = () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_EXPRESS_API_URL}/api/auth/email`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          "x-app-type": "sk",
         },
         body: JSON.stringify({ email }),
-        credentials: "include"
       });
 
 
       if (!res.ok) {
         const errorData = await res.json();
-        toast.error(errorData?.message || "Something went wrong.", { position: "top-center" });
+        toast.error(errorData?.message || "Something went wrong.", { position: "top-center"});
         return; 
       }
 
       const data = await res.json()
 
       if (data.success) {
-        console.log(data)
-        toast.success(data.message)
+        toast.success(data.message, {position: "top-center"})
       } else {
-        toast.info(data.message)
+        toast.info(data.message, {position: "top-center"})
       }
 
       setCountdown(data.otpCooldown)
@@ -231,7 +265,6 @@ const RegisterPage = () => {
 
     } catch (err) {
       console.error("Error sending request:", err);
-      toast.error("Error sending request", { position: "top-center"})
     } finally {
       setSending(false)
     }
@@ -245,21 +278,22 @@ const RegisterPage = () => {
         credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
+					"x-app-type": "sk",
 				},
-				body: JSON.stringify({ otp })
+				body: JSON.stringify({ otp, email })
 			});
 
 			const data = await res.json();
 
 			if (!res.ok) {
-				toast.error(data.message)
+				toast.error(data.message, { position: "top-center"})
         setInvalid(true)
 				return
 			}
 
 			setSuccess(true)
-			toast.success(data.message)
-      return router.replace("/home");
+			toast.success(data.message, {position: "top-center"})
+      return router.replace("/onboarding");
 
 		} catch (error) {
 			console.error("Error: ", error);
@@ -274,7 +308,7 @@ const RegisterPage = () => {
 
   const isFormValid = () => {
     if (step === 1) {
-      return email.trim() !== "" && isValidEmail(email);
+      return email.trim() !== "" && isValidEmail(email) && agreed;
     }
 
     if (step === 2) {
@@ -296,6 +330,8 @@ const RegisterPage = () => {
           isFormValid={isFormValid()}
           sending={sending}
           handleSubmit={handleSubmit}
+          agreed={agreed}
+          setAgreed={setAgreed}
         />
       )
 
