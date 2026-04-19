@@ -5,6 +5,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import Overlay from "@/components/Overlay";
 import { AuthProvider } from "@/context/AuthContext";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 type User = {
   id: string
@@ -44,13 +45,17 @@ async function getUser(): Promise<User | null> {
 const Layout = async ({children}: {children: ReactNode} ) => {
   const user = await getUser()
 
+  if (!user) {
+    redirect("/auth/login")
+  }
+
 
   return (
     <AuthProvider initialUser={user}>
       <div className="w-screen h-screen bg-theme-white flex">
         <SidebarProvider>
           <Sidebar/>
-          <main className="pt-25 md:pt-6 md:ml-18 xl:ml-0 bg-theme-white flex-1 p-8 overflow-y-scroll">
+          <main className="mt-20 md:mt-0 md:pt-6 md:ml-18 xl:ml-0 bg-theme-white flex-1 p-8 overflow-y-scroll">
             <Overlay/>
             <MobileHeader/>
             {children}

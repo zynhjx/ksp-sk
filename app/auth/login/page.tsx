@@ -36,7 +36,7 @@ const LoginPage = () => {
       const data = await result.json()
       
       if (!result.ok) {
-        return toast.error(data.message, {position: "top-center"})
+        return toast.error(data.message, {position: "top-center", description: data.hint, descriptionClassName: "text-gray-900"})
       }
 
       toast.success(data.message, { position: "top-center"})

@@ -31,7 +31,7 @@ const PageHeader = ({
     <div className="flex flex-col mb-8">
       <div className="flex mb-6">
         <div className="flex flex-col space-y-1">
-          <h1 className={twMerge("font-bold text-3xl text-theme-dark-blue")}>
+          <h1 className={twMerge("font-bold text-3xl text-theme-blue")}>
             {title}
           </h1>
           {subtitle && (
@@ -43,7 +43,7 @@ const PageHeader = ({
           <div className="ml-auto flex items-center">
             <button
               onClick={onButtonClick}
-              className="bg-theme-dark-blue text-theme-white px-5 py-2 rounded-md"
+              className="bg-theme-blue text-theme-white px-5 py-2 rounded-md"
             >
               {buttonLabel ?? "Button"}
             </button>

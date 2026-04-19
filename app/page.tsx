@@ -1,7 +1,6 @@
 import Image from "next/image";
 import React from "react";
 import Link from "next/link";
-import Footer from "@/components/Footer";
 import {ChevronRight, UserRound, Zap, BadgeCheck} from "lucide-react";
 
 const Section = ({ children, className, containerClassName, id } : { children: React.ReactNode, className?: string, containerClassName?: string, id?: string }) => {
@@ -270,8 +269,6 @@ const LandingPage = () => {
                     </div>
                 </Section>
             </main>
-
-            <Footer />
         </div>
     );
 };

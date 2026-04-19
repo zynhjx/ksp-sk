@@ -1,9 +1,19 @@
 "use client"
 
+import { MoreHorizontal } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+
 type Announcement = {
   id: string
   title: string
-  type: "important" | "event" | "info" | "reminder"
+  type: "general" | "event" | "urgent" | "reminder" | "opportunity"
   content: string
   postedAt: string
   postedBy: string
@@ -11,9 +21,11 @@ type Announcement = {
 
 type AnnouncementCardProps = {
   announcement: Announcement
+  onEdit?: (announcement: Announcement) => void
+  onDelete?: (announcement: Announcement) => void
 }
 
-const AnnouncementCard = ({ announcement }: AnnouncementCardProps) => {
+const AnnouncementCard = ({ announcement, onEdit, onDelete }: AnnouncementCardProps) => {
   const formatDate = (value: string) =>
     new Date(value).toLocaleDateString("en-PH", {
       year: "numeric",
@@ -26,13 +38,15 @@ const AnnouncementCard = ({ announcement }: AnnouncementCardProps) => {
 
   const getTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
-      case "important":
+      case "urgent":
         return "bg-red-50 text-red-700 border-red-200"
       case "event":
         return "bg-purple-50 text-purple-700 border-purple-200"
       case "reminder":
         return "bg-amber-50 text-amber-700 border-amber-200"
-      case "info":
+      case "opportunity":
+        return "bg-emerald-50 text-emerald-700 border-emerald-200"
+      case "general":
         return "bg-blue-50 text-blue-700 border-blue-200"
       default:
         return "bg-gray-100 text-gray-700 border-gray-200"
@@ -40,31 +54,58 @@ const AnnouncementCard = ({ announcement }: AnnouncementCardProps) => {
   }
 
   return (
-    <article className="border border-gray-200 rounded-xl p-4 bg-theme-card-white flex items-start gap-4 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-180">
-      {/* Type Badge */}
-      <div className="flex-shrink-0 mt-0.5">
-        <span
-          className={`text-xs font-semibold rounded-lg px-2.5 py-1.5 border uppercase tracking-wide block w-max ${getTypeColor(
-            announcement.type
-          )}`}
-        >
-          {announcement.type}
-        </span>
-      </div>
+    <article className="group relative overflow-hidden rounded-3xl border border-gray-200 bg-theme-card-white shadow-sm transition-all duration-180 hover:shadow-md hover:border-gray-300">
+      <div className="flex flex-col gap-5 p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-gray-900 leading-snug">
+              {announcement.title}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 leading-relaxed line-clamp-3 wrap-break-word">
+              {announcement.content}
+            </p>
+          </div>
+          <div className="flex items-start gap-2 shrink-0">
+            <span
+              className={`inline-flex shrink-0 rounded-2xl border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] ${getTypeColor(
+                announcement.type
+              )}`}
+            >
+              {announcement.type}
+            </span>
+            {(onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-7 text-gray-400 hover:text-gray-700 -mt-0.5">
+                    <MoreHorizontal size={16} />
+                    <span className="sr-only">More actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(announcement)}>
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {onEdit && onDelete && <DropdownMenuSeparator />}
+                  {onDelete && (
+                    <DropdownMenuItem variant="destructive" onClick={() => onDelete(announcement)}>
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <h2 className="text-base leading-normal font-bold text-gray-900 mb-1">
-          {announcement.title}
-        </h2>
-        <p className="m-0 text-sm text-gray-700 leading-relaxed line-clamp-2 mb-2.5">
-          {announcement.content}
-        </p>
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex flex-col gap-2 border-t border-gray-100 pt-4 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
           <p className="m-0">
             Posted by <strong className="text-gray-700">{announcement.postedBy}</strong>
           </p>
-          <span className="text-gray-400">{formatDate(announcement.postedAt)}</span>
+          <span className="text-xs text-gray-400">
+            {formatDate(announcement.postedAt)}
+          </span>
         </div>
       </div>
     </article>

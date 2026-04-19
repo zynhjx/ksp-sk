@@ -9,7 +9,7 @@ const MobileHeader = () => {
   const { isOpen, toggleSidebar } = useSidebar()
 
   return (
-    <div className="md:hidden fixed bg-theme-dark-blue top-0 right-0 left-0 h-18.75 flex">
+    <div className="md:hidden fixed bg-theme-blue top-0 right-0 left-0 h-18.75 flex">
       <div className="flex items-center w-18 justify-center">
         <button onClick={() => toggleSidebar()}
           className={twMerge(

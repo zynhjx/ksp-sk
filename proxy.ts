@@ -19,7 +19,7 @@ const isProd = process.env.NODE_ENV === "production";
 const cookieDomain = isProd ? "kabataanprofile.com" : "kabataanprofile.test";
 
 // Routes that require authentication
-const protectedRoutePrefixes = ["/dashboard", "/programs", "/suggestions", "/announcements"];
+const protectedRoutePrefixes = ["/dashboard", "/profile", "/youth-profiles", "/programs", "/suggestions", "/announcements"];
 const authRoutes = ["/auth"];
 
 type PayloadType = {
@@ -36,6 +36,7 @@ export default async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const accessToken = req.cookies.get("accessToken")?.value;
   const refreshToken = req.cookies.get("refreshToken")?.value;
+  const sk_verificationToken = req.cookies.get("sk_verificationToken")?.value
 
   // Check route types
   const isProtectedRoute = protectedRoutePrefixes.some((prefix) =>
@@ -43,10 +44,9 @@ export default async function proxy(req: NextRequest) {
   );
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
   const isOnboardingRoute = pathname.startsWith("/onboarding");
-  const requiresAuth = isProtectedRoute || isOnboardingRoute || isAuthRoute;
 
 
-  if (requiresAuth) {
+  if (isProtectedRoute) {
     if (accessToken) {
       try {
         const { payload }: PayloadType = await jwtVerify(
@@ -54,34 +54,14 @@ export default async function proxy(req: NextRequest) {
           JWT_SECRET
         );
 
-        if (payload.role !== "youth") {
-          if (isAuthRoute) {
-            return NextResponse.next()
-          }
-          return NextResponse.redirect(new URL("/auth", req.url))
-        }
-
-        // If pending status, redirect to onboarding
-        if (payload.status === "pending") {
-          if (isOnboardingRoute) {
-            return NextResponse.next();
-          }
-          return NextResponse.redirect(new URL("/onboarding", req.url));
-        }
-
-      
-        // If already authenticated and trying to access auth/onboarding, redirect to home
-        if (isAuthRoute || isOnboardingRoute) {
-          return NextResponse.redirect(new URL("/dashboard", req.url));
+        if (payload.role !== "sk") {
+          return NextResponse.redirect(new URL("/auth/login", req.url))
         }
 
         return NextResponse.next();
       } catch (error) {
         console.error("Token verification failed:", error);
-        if (isAuthRoute) {
-          return NextResponse.next();
-        }
-        return NextResponse.redirect(new URL("/auth", req.url));
+        return NextResponse.redirect(new URL("/auth/login", req.url));
       }
     } 
     
@@ -91,6 +71,7 @@ export default async function proxy(req: NextRequest) {
           method: "POST",
           headers: {
             Cookie: `refreshToken=${refreshToken}`,
+            "x-app-type": "sk"
           },
         });
 
@@ -106,28 +87,11 @@ export default async function proxy(req: NextRequest) {
             JWT_SECRET
           );
 
-          if (payload.role !== "youth") {
-            if (isAuthRoute) {
-              return NextResponse.next()
-            }
-            return NextResponse.redirect(new URL("/auth", req.url))
+          if (payload.role !== "sk") {
+            return NextResponse.redirect(new URL("/auth/login", req.url))
           }
-          
-          let response: NextResponse;
 
-          if (payload.status === "pending") {
-            if (isOnboardingRoute) {
-              response = NextResponse.next();
-            } else {
-              response = NextResponse.redirect(new URL("/onboarding", req.url));
-            }
-          } else {
-            if (isAuthRoute || isOnboardingRoute) {
-              response = NextResponse.redirect(new URL("/home", req.url));
-            } else {
-              response = NextResponse.next();
-            }
-          }
+          const response = NextResponse.next();
 
           response.cookies.set("accessToken", data.accessToken, {
             httpOnly: true,
@@ -150,24 +114,119 @@ export default async function proxy(req: NextRequest) {
           return response;
         }
 
-        if (isAuthRoute) {
-          return NextResponse.next();
-        }
-        return NextResponse.redirect(new URL("/auth", req.url));
+        const response = NextResponse.redirect(new URL("/auth/login", req.url));
+
+        response.cookies.set("refreshToken", "", {
+          httpOnly: true,
+          secure: isProd,
+          sameSite: "lax",
+          path: "/",
+          maxAge: 0,
+          domain: cookieDomain,
+        });
+
+        return response
       } catch (error) {
         console.error("Token refresh failed:", error);
-        if (isAuthRoute) {
-          return NextResponse.next();
-        }
-        return NextResponse.redirect(new URL("/auth", req.url));
+        const response = NextResponse.redirect(new URL("/auth/login", req.url));
+
+        response.cookies.set("refreshToken", "", {
+          httpOnly: true,
+          secure: isProd,
+          sameSite: "lax",
+          path: "/",
+          maxAge: 0,
+          domain: cookieDomain,
+        });
+
+        return response
       }
     } else {
       if (isAuthRoute) {
         return NextResponse.next()
       }
-      return NextResponse.redirect(new URL("/auth", req.url));
+      return NextResponse.redirect(new URL("/auth/login", req.url));
     }
   }
+
+  if (isAuthRoute || isOnboardingRoute) {
+    if (accessToken) {
+      try {
+        const { payload } = await jwtVerify(accessToken, JWT_SECRET)
+        if (payload.role !== "sk") {
+          return NextResponse.next()
+        }
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+    if (refreshToken) {
+      try {
+        const res = await fetch(`${expressApiUrl}/api/auth/middleware/refresh`, {
+          method: "POST",
+          headers: {
+            Cookie: `refreshToken=${refreshToken}`,
+            "x-app-type": "sk"
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+
+          if (!data?.accessToken || !data?.refreshToken) {
+            throw new Error("Invalid refresh response");
+          }
+
+          const { payload }: PayloadType = await jwtVerify(
+            data.accessToken,
+            JWT_SECRET
+          );
+
+          if (payload.role !== "sk") {
+            if (sk_verificationToken) {
+              try {
+                await jwtVerify(sk_verificationToken, JWT_SECRET)
+                if (isOnboardingRoute) {
+                  return NextResponse.next()
+                }
+                return NextResponse.redirect(new URL("/onboarding", req.url))
+              } catch (err) {
+                console.log(err)
+                const response = NextResponse.next()
+                response.cookies.set("sk_verificationToken", "", {
+                  httpOnly: true,
+                  secure: isProd,
+                  sameSite: "lax",
+                  path: "/",
+                  maxAge: 0,
+                  domain: cookieDomain,
+                })
+                return response
+              }
+            }
+            if (isAuthRoute) {
+              return NextResponse.next()
+            }
+            return NextResponse.redirect(new URL("/auth/login", req.url));
+          }
+          return NextResponse.redirect(new URL("/dashboard", req.url));
+        }
+
+        return NextResponse.next()
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+    
+  }
+    
+
+    
+  
+  
 
   return NextResponse.next();
 }
