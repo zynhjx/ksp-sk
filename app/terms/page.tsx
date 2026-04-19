@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 const toc = [
   { id: "services", num: "01", title: "Our Services" },
@@ -33,7 +33,26 @@ const toc = [
   { id: "contact", num: "28", title: "Contact Us" },
 ];
 
-const SectionTitle = ({ id, num, children }) => (
+type SectionTitleProps = {
+  id: string;
+  num: string;
+  children: ReactNode;
+};
+
+type ChildrenProps = {
+  children: ReactNode;
+};
+
+type ParagraphProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+type BulletListProps = {
+  items: string[];
+};
+
+const SectionTitle = ({ id, num, children }: SectionTitleProps) => (
   <h2
     id={id}
     className="flex items-center gap-3 text-xl font-bold text-slate-900 mt-12 mb-4 scroll-mt-24 border-b border-slate-200 pb-3"
@@ -45,15 +64,15 @@ const SectionTitle = ({ id, num, children }) => (
   </h2>
 );
 
-const SubTitle = ({ children }) => (
+const SubTitle = ({ children }: ChildrenProps) => (
   <h3 className="text-base font-semibold text-slate-800 mt-6 mb-2">{children}</h3>
 );
 
-const P = ({ children, className = "" }) => (
+const P = ({ children, className = "" }: ParagraphProps) => (
   <p className={`text-slate-600 leading-relaxed text-sm mb-3 ${className}`}>{children}</p>
 );
 
-const BulletList = ({ items }) => (
+const BulletList = ({ items }: BulletListProps) => (
   <ul className="space-y-2 mb-4 ml-1">
     {items.map((item, i) => (
       <li key={i} className="flex gap-3 text-sm text-slate-600 leading-relaxed">

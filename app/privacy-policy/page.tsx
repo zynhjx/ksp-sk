@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 const toc = [
   { id: "infocollect", num: "01", title: "What Information Do We Collect?" },
   { id: "infouse", num: "02", title: "How Do We Process Your Information?" },
@@ -13,7 +15,35 @@ const toc = [
   { id: "request", num: "12", title: "How Can You Review, Update, or Delete the Data We Collect?" },
 ];
 
-const SectionTitle = ({ id, num, children }) => (
+type SectionTitleProps = {
+  id: string;
+  num: string;
+  children: ReactNode;
+};
+
+type ChildrenProps = {
+  children: ReactNode;
+};
+
+type ParagraphProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+type BulletListProps = {
+  items: string[];
+};
+
+type EmailProps = {
+  address: string;
+};
+
+type ExternalLinkProps = {
+  href: string;
+  children: ReactNode;
+};
+
+const SectionTitle = ({ id, num, children }: SectionTitleProps) => (
   <h2
     id={id}
     className="flex items-baseline gap-3 text-xl font-bold text-slate-900 mt-12 mb-4 scroll-mt-24 border-b border-slate-200 pb-3"
@@ -25,15 +55,15 @@ const SectionTitle = ({ id, num, children }) => (
   </h2>
 );
 
-const SubTitle = ({ children }) => (
+const SubTitle = ({ children }: ChildrenProps) => (
   <h3 className="text-base font-semibold text-slate-800 mt-6 mb-2">{children}</h3>
 );
 
-const P = ({ children, className = "" }) => (
+const P = ({ children, className = "" }: ParagraphProps) => (
   <p className={`text-slate-600 leading-relaxed text-sm mb-3 ${className}`}>{children}</p>
 );
 
-const InShort = ({ children }) => (
+const InShort = ({ children }: ChildrenProps) => (
   <div className="flex gap-2 mb-4 bg-teal-50/60 border border-teal-100 rounded-lg px-4 py-3">
     <span className="text-teal-500 shrink-0 mt-0.5">
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -44,7 +74,7 @@ const InShort = ({ children }) => (
   </div>
 );
 
-const BulletList = ({ items }) => (
+const BulletList = ({ items }: BulletListProps) => (
   <ul className="space-y-2 mb-4 ml-1">
     {items.map((item, i) => (
       <li key={i} className="flex gap-3 text-sm text-slate-600 leading-relaxed">
@@ -55,7 +85,7 @@ const BulletList = ({ items }) => (
   </ul>
 );
 
-const Email = ({ address }) => (
+const Email = ({ address }: EmailProps) => (
   <a
     href={`mailto:${address}`}
     className="text-teal-600 hover:text-teal-700 hover:underline font-medium transition-colors"
@@ -64,7 +94,7 @@ const Email = ({ address }) => (
   </a>
 );
 
-const ExternalLink = ({ href, children }) => (
+const ExternalLink = ({ href, children }: ExternalLinkProps) => (
   <a
     href={href}
     target="_blank"
