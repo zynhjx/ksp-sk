@@ -1,6 +1,12 @@
 "use client"
 
-import { MapPin, Trash2 } from "lucide-react"
+import { Eye, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 type SuggestionCardProps = {
   suggestion?: {
@@ -12,27 +18,27 @@ type SuggestionCardProps = {
     location: string
   }
   canModify?: boolean
-  onApprove?: (id: string) => void
-  onDecline?: (id: string) => void
+  onView?: (id: string) => void
+  onEdit?: (id: string) => void
   onDelete?: (id: string) => void
 }
 
-const getCategoryColor = (category: string) => {
+export const getCategoryColor = (category: string) => {
   switch (category) {
     case "Education":
-      return "bg-blue-50 text-blue-700 border-blue-200"
+      return "text-blue-600"
     case "Employment":
-      return "bg-violet-50 text-violet-700 border-violet-200"
+      return "text-violet-600"
     case "Health":
-      return "bg-rose-50 text-rose-700 border-rose-200"
+      return "text-rose-600"
     case "Sports":
-      return "bg-green-50 text-green-700 border-green-200"
+      return "text-green-600"
     case "Environment":
-      return "bg-teal-50 text-teal-700 border-teal-200"
+      return "text-teal-600"
     case "Community / Social":
-      return "bg-orange-50 text-orange-700 border-orange-200"
+      return "text-orange-600"
     default:
-      return "bg-gray-100 text-gray-600 border-gray-200"
+      return "text-gray-500"
   }
 }
 
@@ -50,6 +56,8 @@ const mockSuggestion = {
 const SuggestionCard = ({
   suggestion,
   canModify = false,
+  onView,
+  onEdit,
   onDelete,
 }: SuggestionCardProps) => {
   const current = suggestion || mockSuggestion
@@ -58,16 +66,43 @@ const SuggestionCard = ({
     <article className="group relative self-start border border-gray-200 rounded-2xl bg-white flex flex-col overflow-hidden shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200">
 
       <div className="flex flex-col gap-3 p-4">
-        {/* Title + Category */}
+        {/* Title + Menu */}
         <div className="flex items-start justify-between gap-2">
           <h2 className="text-base font-semibold text-gray-900 leading-snug flex-1">
             {current.title}
           </h2>
-          <span
-            className={`shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 border whitespace-nowrap ${getCategoryColor(current.category)}`}
-          >
-            {current.category}
-          </span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="More actions"
+                className="shrink-0 h-7 w-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+              >
+                <MoreVertical size={15} strokeWidth={2} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuItem onClick={() => onView?.(current.id)}>
+                <Eye size={13} strokeWidth={2} className="mr-2" />
+                View
+              </DropdownMenuItem>
+              {canModify && (
+                <>
+                  <DropdownMenuItem onClick={() => onEdit?.(current.id)}>
+                    <Pencil size={13} strokeWidth={2} className="mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600"
+                    onClick={() => onDelete?.(current.id)}
+                  >
+                    <Trash2 size={13} strokeWidth={2} className="mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Description */}
@@ -75,7 +110,7 @@ const SuggestionCard = ({
           <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
             Description
           </span>
-          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap wrap-anywhere">
+          <p className="text-sm text-gray-600 leading-relaxed line-clamp-5">
             {current.description}
           </p>
         </div>
@@ -85,32 +120,28 @@ const SuggestionCard = ({
           <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
             Suggested Solution
           </span>
-          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap wrap-anywhere">
+          <p className="text-sm text-gray-600 leading-relaxed line-clamp-5">
             {current.suggestedSolution}
           </p>
+        </div>
+
+        {/* Category */}
+        <div className="flex flex-col gap-1">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
+            Category
+          </span>
+          <span className={`text-sm font-medium ${getCategoryColor(current.category)}`}>
+            {current.category}
+          </span>
         </div>
 
         {/* Divider */}
         <hr className="border-gray-100" />
 
-        {/* Location + Delete */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <MapPin size={12} strokeWidth={2} className="text-gray-400 shrink-0" />
-            <span>{current.location}</span>
-          </div>
-
-          {canModify && onDelete ? (
-            <button
-              type="button"
-              aria-label={`Delete ${current.title}`}
-              title="Delete suggestion"
-              className="h-8 w-8 shrink-0 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
-              onClick={() => onDelete(current.id)}
-            >
-              <Trash2 size={13} strokeWidth={2} className="mx-auto" />
-            </button>
-          ) : null}
+        {/* Location */}
+        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+          <MapPin size={12} strokeWidth={2} className="text-gray-400 shrink-0" />
+          <span className="truncate">{current.location}</span>
         </div>
       </div>
     </article>

@@ -3,11 +3,14 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import ProgramCard from "@/components/ProgramCard"
+import EmptyState from "@/components/EmptyState"
+import { MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { logActivity } from "@/lib/logActivity"
 import {
   Select,
   SelectContent,
@@ -43,6 +46,7 @@ type Program = {
   location: string
   description: string
   createdAt: string
+  updatedAt: string
   participants: number
   startDate: string
   untilDate: string
@@ -100,6 +104,8 @@ type RawProgram = {
   details?: string
   createdAt?: string
   created_at?: string
+  updatedAt?: string
+  updated_at?: string
   participants?: number
   participant_count?: number
   startDate?: string
@@ -118,6 +124,7 @@ const Programs = () => {
   const [statusFilter, setStatusFilter] = useState("All")
   const [categoryFilter, setCategoryFilter] = useState("All")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isViewOpen, setIsViewOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
@@ -175,6 +182,7 @@ const Programs = () => {
       location: String(value.location || value.venue || "TBA"),
       description: String(value.description || value.details || "No description provided."),
       createdAt: String(value.createdAt || value.created_at || new Date().toISOString()),
+      updatedAt: String(value.updatedAt || value.updated_at || value.createdAt || value.created_at || new Date().toISOString()),
       participants: Number(value.participants || value.participant_count || 0),
       startDate,
       untilDate,
@@ -324,6 +332,7 @@ const Programs = () => {
         return
       }
 
+      const notifiedCount: number = Number(body?.notifiedCount ?? 0)
       const createdProgram = body?.data || body?.program || body || {}
       const normalizedStartDate =
         String(createdProgram.startDate || createdProgram.start_date || startIso)
@@ -347,7 +356,17 @@ const Programs = () => {
       void fetchPrograms(false)
       resetCreateForm()
       setIsCreateOpen(false)
-      toast.success("Program created successfully.")
+      toast.success(
+        notifiedCount > 0
+          ? `Program created successfully. ${notifiedCount} youth member${notifiedCount === 1 ? "" : "s"} notified.`
+          : "Program created successfully."
+      )
+      logActivity({
+        title: "Program Created",
+        description: `Created program "${nextProgram.name}".`,
+        action: "create_program",
+        entity_type: "program",
+      })
     } catch {
       toast.error("Unable to connect to the server. Please try again.")
     } finally {
@@ -464,6 +483,12 @@ const Programs = () => {
       setIsEditOpen(false)
       setSelectedProgram(null)
       toast.success("Program updated successfully.")
+      logActivity({
+        title: "Program Updated",
+        description: `Updated program "${selectedProgram.name}".`,
+        action: "update_program",
+        entity_type: "program",
+      })
     } catch {
       toast.error("Unable to connect to the server. Please try again.")
     } finally {
@@ -474,6 +499,11 @@ const Programs = () => {
   const handleOpenDeleteProgram = (program: Program) => {
     setSelectedProgram(program)
     setIsDeleteOpen(true)
+  }
+
+  const handleOpenViewProgram = (program: Program) => {
+    setSelectedProgram(program)
+    setIsViewOpen(true)
   }
 
   const handleConfirmDeleteProgram = async () => {
@@ -526,6 +556,12 @@ const Programs = () => {
       setPrograms((prev) => prev.filter((program) => program.id !== selectedProgram.id))
       setIsDeleteOpen(false)
       toast.success("Program deleted successfully.")
+      logActivity({
+        title: "Program Deleted",
+        description: `Deleted program "${selectedProgram.name}".`,
+        action: "delete_program",
+        entity_type: "program",
+      })
       setSelectedProgram(null)
     } catch {
       toast.error("Unable to connect to the server. Please try again.")
@@ -723,9 +759,9 @@ const Programs = () => {
           {loadError}
         </div>
       ) : filteredPrograms.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-theme-card-white p-8 text-center text-gray-500">
-          No programs match your search or filters.
-        </div>
+        <EmptyState
+          message="No programs found. Try adjusting your search or filters."
+        />
       ) : (
         <div
           className="grid gap-4"
@@ -735,6 +771,7 @@ const Programs = () => {
             <ProgramCard
               key={program.id}
               program={program}
+              onView={handleOpenViewProgram}
               onEdit={handleOpenEditProgram}
               onDelete={handleOpenDeleteProgram}
             />
@@ -845,6 +882,66 @@ const Programs = () => {
                 </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isViewOpen}
+        onOpenChange={(open) => {
+          setIsViewOpen(open)
+          if (!open) setSelectedProgram(null)
+        }}
+      >
+        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
+            <DialogTitle>{selectedProgram?.name ?? "Program Details"}</DialogTitle>
+          </DialogHeader>
+
+          {selectedProgram ? (
+            <div className="flex-1 overflow-y-auto px-6 pb-4 pt-0 space-y-4">
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selectedProgram.description}</p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Status</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">{selectedProgram.status}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Category</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">{selectedProgram.category}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Created</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">
+                    {new Date(selectedProgram.createdAt).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Last Modified</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">
+                    {new Date(selectedProgram.updatedAt).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Start</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">
+                    {new Date(selectedProgram.startDate).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Until</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">
+                    {new Date(selectedProgram.untilDate).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="shrink-0 flex items-start gap-2 border-t border-gray-100 px-6 py-3">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+            <span className="text-sm text-gray-500 leading-snug">{selectedProgram?.location}</span>
+          </div>
         </DialogContent>
       </Dialog>
 

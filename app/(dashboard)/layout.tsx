@@ -4,6 +4,7 @@ import MobileHeader from "@/components/MobileHeader";
 import { SidebarProvider } from "@/context/SidebarContext";
 import Overlay from "@/components/Overlay";
 import { AuthProvider } from "@/context/AuthContext";
+import SuspensionGuard from "@/components/SuspensionGuard";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -52,6 +53,7 @@ const Layout = async ({children}: {children: ReactNode} ) => {
 
   return (
     <AuthProvider initialUser={user}>
+      <SuspensionGuard />
       <div className="w-screen h-screen bg-theme-white flex">
         <SidebarProvider>
           <Sidebar/>

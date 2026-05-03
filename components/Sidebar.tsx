@@ -11,7 +11,8 @@ import {
   LucideLayoutDashboard,
   Sidebar as SidebarIcon,
   ChevronRight,
-  ChevronUp
+  ChevronUp,
+  ScrollTextIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -56,6 +57,7 @@ const skNavs = [
   { name: "Programs", icon: ClipboardListIcon, path: "/programs" },
   { name: "Suggestions", icon: MessageSquareIcon, path: "/suggestions" },
   { name: "Announcements", icon: MegaphoneIcon, path: "/announcements" },
+  { name: "Activity Logs", icon: ScrollTextIcon, path: "/activity-logs" },
 ];
 
 // const adminNavs = [

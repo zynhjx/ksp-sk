@@ -58,6 +58,10 @@ export default async function proxy(req: NextRequest) {
           return NextResponse.redirect(new URL("/auth/login", req.url))
         }
 
+        if (payload.status === "pending") {
+          return NextResponse.redirect(new URL("/auth/login", req.url))
+        }
+
         return NextResponse.next();
       } catch (error) {
         console.error("Token verification failed:", error);
@@ -88,6 +92,10 @@ export default async function proxy(req: NextRequest) {
           );
 
           if (payload.role !== "sk") {
+            return NextResponse.redirect(new URL("/auth/login", req.url))
+          }
+
+          if (payload.status === "pending") {
             return NextResponse.redirect(new URL("/auth/login", req.url))
           }
 
@@ -152,10 +160,23 @@ export default async function proxy(req: NextRequest) {
   if (isAuthRoute || isOnboardingRoute) {
     if (accessToken) {
       try {
-        const { payload } = await jwtVerify(accessToken, JWT_SECRET)
+        const { payload }: PayloadType = await jwtVerify(accessToken, JWT_SECRET)
         if (payload.role !== "sk") {
           return NextResponse.next()
         }
+
+        if (payload.status === "pending") {
+          if (isOnboardingRoute) {
+            // Already completed onboarding — send back to login
+            return NextResponse.redirect(new URL("/auth/login", req.url))
+          }
+          // On auth routes: clear tokens so the user must log in fresh after approval
+          const response = NextResponse.next()
+          response.cookies.set("accessToken", "", { httpOnly: true, secure: isProd, sameSite: "lax", path: "/", maxAge: 0, domain: cookieDomain })
+          response.cookies.set("refreshToken", "", { httpOnly: true, secure: isProd, sameSite: "lax", path: "/", maxAge: 0, domain: cookieDomain })
+          return response
+        }
+
         return NextResponse.redirect(new URL("/dashboard", req.url));
       } catch (err) {
         console.log(err)
@@ -211,6 +232,18 @@ export default async function proxy(req: NextRequest) {
             }
             return NextResponse.redirect(new URL("/auth/login", req.url));
           }
+
+          if (payload.status === "pending") {
+            if (isOnboardingRoute) {
+              return NextResponse.redirect(new URL("/auth/login", req.url))
+            }
+            // Clear tokens so user must log in fresh after admin approves
+            const response = NextResponse.next()
+            response.cookies.set("accessToken", "", { httpOnly: true, secure: isProd, sameSite: "lax", path: "/", maxAge: 0, domain: cookieDomain })
+            response.cookies.set("refreshToken", "", { httpOnly: true, secure: isProd, sameSite: "lax", path: "/", maxAge: 0, domain: cookieDomain })
+            return response
+          }
+
           return NextResponse.redirect(new URL("/dashboard", req.url));
         }
 

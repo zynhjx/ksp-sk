@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import PublicFooter from "@/components/PublicFooter";
 
 const toc = [
   { id: "infocollect", num: "01", title: "What Information Do We Collect?" },
@@ -363,5 +364,6 @@ export default function PrivacyPolicy() {
         </div>
       </div>
     </div>
+    <PublicFooter />
   );
 }

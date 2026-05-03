@@ -23,7 +23,7 @@ const LoginPage = () => {
     e.preventDefault()
     setSending(true)
     try {
-      const result = await fetch(`${apiUrl}/api/auth/login`, {
+      const result = await fetch(`${apiUrl}/api/auth/local/login`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -37,6 +37,11 @@ const LoginPage = () => {
       
       if (!result.ok) {
         return toast.error(data.message, {position: "top-center", description: data.hint, descriptionClassName: "text-gray-900"})
+      }
+
+      const status = data.user?.status ?? data.status
+      if (status === "pending") {
+        return toast.warning("Your account is still pending admin approval. Please wait to be activated.", { position: "top-center" })
       }
 
       toast.success(data.message, { position: "top-center"})

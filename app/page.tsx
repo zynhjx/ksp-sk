@@ -2,6 +2,7 @@ import Image from "next/image";
 import React from "react";
 import Link from "next/link";
 import {ChevronRight, UserRound, Zap, BadgeCheck} from "lucide-react";
+import PublicFooter from "@/components/PublicFooter";
 
 const Section = ({ children, className, containerClassName, id } : { children: React.ReactNode, className?: string, containerClassName?: string, id?: string }) => {
     return (
@@ -37,6 +38,7 @@ const StatItem = ({ label, value }: { label: string, value: string }) => {
 const LandingPage = () => {
 
     return (
+        <>
         <div className="min-h-screen bg-theme-white">
             <header className="sticky top-0 z-100 bg-theme-white border-b border-gray-100 flex items-center justify-center">
                 <div className="relative flex items-center justify-between h-20 w-full max-w-7xl px-6">
@@ -270,6 +272,8 @@ const LandingPage = () => {
                 </Section>
             </main>
         </div>
+        <PublicFooter />
+        </>
     );
 };
 

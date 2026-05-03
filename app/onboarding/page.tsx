@@ -3,20 +3,14 @@
 import CardTitle from '@/components/auth/CardTitle'
 import { motion } from 'framer-motion'
 import FormInput from '@/components/auth/form/FormInput'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Button from '@/components/Button'
-import { twMerge } from 'tailwind-merge'
 import { toast } from 'sonner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select'
 import { useRouter } from 'next/navigation'
-import Swal from "sweetalert2";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Button as ShadButton } from '@/components/ui/button'
 
-
-const barangays = [
-  "Barangay Bagong Sikat",
-  "Barangay Maunlad",
-  "Barangay Bagong Silang"
-]
 
 const positions = [
   "Chairperson",
@@ -27,14 +21,49 @@ const positions = [
 
 const OnboardingPage = () => {
   const [submitPending, setSubmitPending] = useState(false)
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false)
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [barangay, setBarangay] = useState("");
   const [position, setPosition] = useState("")
   const [password, setPassword] = useState("")
   const [confPassword, setConfPassword] = useState("")
+  const [barangays, setBarangays] = useState<string[]>([])
+  const [barangaysLoading, setBarangaysLoading] = useState(true)
 
   const router = useRouter()
+
+  useEffect(() => {
+    const fetchBarangays = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_EXPRESS_API_URL}/api/sk/barangays`, {
+          headers: { "x-app-type": "sk" },
+          credentials: "include",
+        })
+        const body = await res.json().catch(() => ({}))
+        if (!res.ok) return
+        const list: string[] = Array.isArray(body.data)
+          ? body.data.map((item: unknown) => {
+              if (typeof item === "string") return item
+              if (item && typeof item === "object" && "name" in item) return String((item as { name: unknown }).name)
+              return String(item)
+            })
+          : Array.isArray(body)
+            ? body.map((item: unknown) => {
+                if (typeof item === "string") return item
+                if (item && typeof item === "object" && "name" in item) return String((item as { name: unknown }).name)
+                return String(item)
+              })
+            : []
+        setBarangays(list)
+      } catch {
+        // silently fall back to empty list
+      } finally {
+        setBarangaysLoading(false)
+      }
+    }
+    void fetchBarangays()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,15 +99,7 @@ const OnboardingPage = () => {
         throw new Error(data.message || "Something went wrong");
       }
 
-      Swal.fire({
-        title: "Success!",
-        text: "Profile completed",
-        icon: "success",
-        timer: 1200,
-        showConfirmButton: false,
-      }).then(() => {
-        return router.replace("/dashboard")
-      });
+      setShowApprovalDialog(true)
 
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -96,6 +117,27 @@ const OnboardingPage = () => {
   const isFormValid = firstName.trim() !== "" && lastName.trim() !== "" && barangay.trim() !== "" && password.trim() !== "" && password === confPassword && password.length >= 8
 
   return (
+    <>
+    <Dialog open={showApprovalDialog} onOpenChange={() => {}}
+    >
+      <DialogContent
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        showCloseButton={false}
+      >
+        <DialogHeader>
+          <DialogTitle>Account Submitted</DialogTitle>
+          <DialogDescription>
+            Your profile has been submitted successfully. Please wait for the admin to review and approve your account before you can access the portal.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <ShadButton onClick={() => router.replace("/auth/login")}>
+            Got it
+          </ShadButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     <div className="min-h-screen bg-theme-white md:bg-gray-50 flex flex-col items-center md:justify-center md:p-6 text-gray-900">
       <div className="w-full mt-8 md:mt-0 max-w-full md:max-w-xl bg-theme-white md:rounded-3xl md:shadow-xl md:shadow-theme-blue/40 md:border border-gray-100 overflow-hidden p-8 md:p-12">
         <CardTitle title='Welcome Aboard' subtitle='Let’s get you set up in just a few steps.'/>
@@ -125,9 +167,9 @@ const OnboardingPage = () => {
               </div>
 
               <label className="text-sm font-semibold text-gray-700">Barangay</label>
-              <Select value={barangay} onValueChange={setBarangay}>
+              <Select value={barangay} onValueChange={setBarangay} disabled={barangaysLoading}>
                 <SelectTrigger className='text-base w-full min-h-12 flex-1 px-4 rounded border border-gray-200 focus:border-theme-blue focus:ring-0 outline-none transition'>
-                  <SelectValue placeholder="Select Barangay"/>
+                  <SelectValue placeholder={barangaysLoading ? "Loading barangays..." : "Select Barangay"}/>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -186,6 +228,7 @@ const OnboardingPage = () => {
 
       </div>
     </div>
+    </>
   )
 }
 

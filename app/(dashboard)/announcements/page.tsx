@@ -3,11 +3,13 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import AnnouncementCard from "@/components/AnnouncementCard"
+import EmptyState from "@/components/EmptyState"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { logActivity } from "@/lib/logActivity"
 import {
   Select,
   SelectContent,
@@ -45,6 +47,7 @@ type Announcement = {
   content: string
   postedAt: string
   postedBy: string
+  barangay: string
 }
 
 type RawAnnouncement = {
@@ -53,14 +56,39 @@ type RawAnnouncement = {
   description?: string
   type?: string
   posted_by?: string
+  barangay?: string
   created_at?: string
   updated_at?: string
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL
-
 const formatTypeLabel = (type: AnnouncementType) =>
   type.charAt(0).toUpperCase() + type.slice(1)
+
+const normalizeAnnouncementType = (value: unknown): AnnouncementType => {
+  const normalized = String(value || "").trim().toLowerCase()
+
+  if (announcementTypes.includes(normalized as AnnouncementType)) {
+    return normalized as AnnouncementType
+  }
+
+  return "general"
+}
+
+const normalizeAnnouncement = (value: RawAnnouncement): Announcement => {
+  const nowIso = new Date().toISOString()
+
+  return {
+    id: String(value.id || generateAnnouncementId()),
+    title: String(value.title || "Untitled Announcement"),
+    type: normalizeAnnouncementType(value.type),
+    content: String(value.description || "No description provided."),
+    postedAt: String(value.created_at || value.updated_at || nowIso),
+    postedBy: String(value.posted_by || "SK Council"),
+    barangay: String(value.barangay || "Unspecified"),
+  }
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL
 
 const generateAnnouncementId = () => {
   if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) {
@@ -82,37 +110,10 @@ const Announcements = () => {
   const [newTitle, setNewTitle] = useState("")
   const [newDescription, setNewDescription] = useState("")
   const [newPurpose, setNewPurpose] = useState<AnnouncementType>("general")
-  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isViewOpen, setIsViewOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null)
-  const [editTitle, setEditTitle] = useState("")
-  const [editDescription, setEditDescription] = useState("")
-  const [editPurpose, setEditPurpose] = useState<AnnouncementType>("general")
-
-  const normalizeAnnouncementType = (value: unknown): AnnouncementType => {
-    const normalized = String(value || "").trim().toLowerCase()
-
-    if (announcementTypes.includes(normalized as AnnouncementType)) {
-      return normalized as AnnouncementType
-    }
-
-    return "general"
-  }
-
-  const normalizeAnnouncement = (value: RawAnnouncement): Announcement => {
-    const nowIso = new Date().toISOString()
-
-    return {
-      id: String(value.id || generateAnnouncementId()),
-      title: String(value.title || "Untitled Announcement"),
-      type: normalizeAnnouncementType(value.type),
-      content: String(value.description || "No description provided."),
-      postedAt: String(value.created_at || value.updated_at || nowIso),
-      postedBy: String(value.posted_by || "SK Council"),
-    }
-  }
 
   const fetchAnnouncements = useCallback(
     async (showLoader = false) => {
@@ -244,6 +245,12 @@ const Announcements = () => {
       setNewPurpose("general")
       setIsCreateOpen(false)
       toast.success("Announcement created successfully.")
+      logActivity({
+        title: "Announcement Created",
+        description: `Created announcement "${normalized.title}".`,
+        action: "create_announcement",
+        entity_type: "announcement",
+      })
     } catch {
       toast.error("Unable to connect to the server. Please try again.")
     } finally {
@@ -268,42 +275,9 @@ const Announcements = () => {
     })
   }, [announcements, search, typeFilter])
 
-  const handleOpenEdit = (announcement: Announcement) => {
+  const handleOpenView = (announcement: Announcement) => {
     setSelectedAnnouncement(announcement)
-    setEditTitle(announcement.title)
-    setEditDescription(announcement.content)
-    setEditPurpose(announcement.type)
-    setIsEditOpen(true)
-  }
-
-  const handleSaveEdit = async () => {
-    if (!selectedAnnouncement) return
-    const title = editTitle.trim()
-    const description = editDescription.trim()
-    if (!title || !description) {
-      toast.error("Title and description are required.")
-      return
-    }
-    setIsSaving(true)
-    try {
-      const res = await fetch(`${API_BASE}/api/sk/announcements/${selectedAnnouncement.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-app-type": "sk" },
-        credentials: "include",
-        body: JSON.stringify({ title, description, type: editPurpose }),
-      })
-      if (res.status === 401) { toast.error("Session expired."); router.push("/auth/login"); return }
-      if (res.status === 403) { toast.error("You do not have permission to edit announcements."); return }
-      const body = await res.json().catch(() => ({}))
-      if (!res.ok) { toast.error(body.message || "Failed to update announcement."); return }
-      await fetchAnnouncements(false)
-      setIsEditOpen(false)
-      toast.success("Announcement updated.")
-    } catch {
-      toast.error("Unable to connect to the server.")
-    } finally {
-      setIsSaving(false)
-    }
+    setIsViewOpen(true)
   }
 
   const handleOpenDelete = (announcement: Announcement) => {
@@ -326,6 +300,12 @@ const Announcements = () => {
       await fetchAnnouncements(false)
       setIsDeleteOpen(false)
       toast.success("Announcement deleted.")
+      logActivity({
+        title: "Announcement Deleted",
+        description: `Deleted announcement "${selectedAnnouncement.title}".`,
+        action: "delete_announcement",
+        entity_type: "announcement",
+      })
     } catch {
       toast.error("Unable to connect to the server.")
     } finally {
@@ -450,55 +430,60 @@ const Announcements = () => {
           {loadError}
         </div>
       ) : filteredAnnouncements.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-theme-card-white p-8 text-center text-gray-500">
-          No announcements match your search or filters.
-        </div>
+        <EmptyState
+          message="No announcements found. Try adjusting your search or filters."
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {filteredAnnouncements.map((announcement) => (
             <AnnouncementCard
               key={announcement.id}
               announcement={announcement}
-              onEdit={handleOpenEdit}
+              onView={handleOpenView}
               onDelete={handleOpenDelete}
             />
           ))}
         </div>
       )}
 
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Announcement</DialogTitle>
-            <DialogDescription>Update the details of this announcement.</DialogDescription>
+      <Dialog
+        open={isViewOpen}
+        onOpenChange={(open) => {
+          setIsViewOpen(open)
+          if (!open) setSelectedAnnouncement(null)
+        }}
+      >
+        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
+            <DialogTitle>{selectedAnnouncement?.title ?? "Announcement"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-ann-title">Title</Label>
-              <Input id="edit-ann-title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="bg-white" />
+
+          {selectedAnnouncement ? (
+            <div className="flex-1 overflow-y-auto px-6 pb-4 pt-0 space-y-4">
+              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selectedAnnouncement.content}</p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Posted By</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">{selectedAnnouncement.postedBy}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Category</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">{formatTypeLabel(selectedAnnouncement.type)}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Barangay</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">{selectedAnnouncement.barangay}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Created At</p>
+                  <p className="mt-1 text-sm font-medium text-slate-800">
+                    {new Date(selectedAnnouncement.postedAt).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-ann-description">Description</Label>
-              <Textarea id="edit-ann-description" rows={4} value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="bg-white" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-ann-purpose">Purpose</Label>
-              <Select value={editPurpose} onValueChange={(v) => setEditPurpose(v as AnnouncementType)}>
-                <SelectTrigger id="edit-ann-purpose" className="h-10 bg-white border border-gray-200 rounded-sm px-4">
-                  <SelectValue placeholder="Select purpose" />
-                </SelectTrigger>
-                <SelectContent>
-                  {announcementTypes.map((option) => (
-                    <SelectItem key={option} value={option}>{formatTypeLabel(option)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={isSaving}>Cancel</Button>
-            <Button onClick={handleSaveEdit} disabled={isSaving}>{isSaving ? "Saving..." : "Save Changes"}</Button>
-          </DialogFooter>
+          ) : null}
         </DialogContent>
       </Dialog>
 

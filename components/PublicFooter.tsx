@@ -22,6 +22,16 @@ const PublicFooter = () => {
     return null;
   }
 
+  const isAuthRoute = pathname.startsWith("/auth");
+
+  if (isAuthRoute) {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 z-10">
+        <Footer />
+      </div>
+    );
+  }
+
   return <Footer />;
 };
 

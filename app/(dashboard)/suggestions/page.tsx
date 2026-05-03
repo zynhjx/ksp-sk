@@ -1,8 +1,22 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { type FormEvent, useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import SuggestionCard from "@/components/SuggestionCard"
+import SuggestionCard, { getCategoryColor } from "@/components/SuggestionCard"
+import EmptyState from "@/components/EmptyState"
+import { MapPin } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
@@ -21,6 +35,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+import { logActivity } from "@/lib/logActivity"
 
 type Suggestion = {
   id: string
@@ -56,6 +71,11 @@ type DeleteSuggestionResponse = {
   }
 }
 
+type UpdateSuggestionResponse = {
+  message?: string
+  data?: RawSuggestion
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL
 
 const Suggestions = () => {
@@ -65,6 +85,12 @@ const Suggestions = () => {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [deletingSuggestionId, setDeletingSuggestionId] = useState<string | null>(null)
   const [pendingDeleteSuggestionId, setPendingDeleteSuggestionId] = useState<string | null>(null)
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  const [viewSuggestion, setViewSuggestion] = useState<Suggestion | null>(null)
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [editSuggestion, setEditSuggestion] = useState<Suggestion | null>(null)
+  const [editForm, setEditForm] = useState({ title: "", description: "", suggestedSolution: "", location: "", category: "" })
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false)
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("")
 
@@ -142,6 +168,84 @@ const Suggestions = () => {
     void fetchSuggestions(true)
   }, [fetchSuggestions])
 
+  const openEditDialog = (id: string) => {
+    const found = suggestions.find((s) => s.id === id)
+    if (!found) return
+    setEditSuggestion(found)
+    setEditForm({
+      title: found.title,
+      description: found.description,
+      suggestedSolution: found.suggestedSolution,
+      location: found.location,
+      category: found.category,
+    })
+    setIsEditOpen(true)
+  }
+
+  const handleEditSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!editSuggestion) return
+
+    if (!API_BASE) {
+      toast.error("Missing API URL configuration.")
+      return
+    }
+
+    setIsSubmittingEdit(true)
+
+    try {
+      const res = await fetch(`${API_BASE}/api/sk/suggestions/${encodeURIComponent(editSuggestion.id)}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-app-type": "sk",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          title: editForm.title,
+          description: editForm.description,
+          suggested_solution: editForm.suggestedSolution,
+          location: editForm.location,
+          category: editForm.category,
+        }),
+      })
+
+      if (res.status === 401) {
+        toast.error("Your session expired. Please log in again.")
+        router.push("/auth/login")
+        return
+      }
+
+      if (res.status === 403) {
+        toast.error("You do not have permission to edit suggestions.")
+        return
+      }
+
+      const body: UpdateSuggestionResponse = await res.json().catch(() => ({}))
+
+      if (!res.ok) {
+        toast.error(body.message || "Failed to update suggestion.")
+        return
+      }
+
+      const updated = body.data ? normalizeSuggestion(body.data) : { ...editSuggestion, ...editForm }
+      setSuggestions((prev) => prev.map((s) => (s.id === editSuggestion.id ? updated : s)))
+      setIsEditOpen(false)
+      setEditSuggestion(null)
+      toast.success(body.message || "Suggestion updated successfully")
+      logActivity({
+        title: "Suggestion Updated",
+        description: `Updated suggestion "${editForm.title}".`,
+        action: "update_suggestion",
+        entity_type: "suggestion",
+      })
+    } catch {
+      toast.error("Unable to connect to the server. Please try again.")
+    } finally {
+      setIsSubmittingEdit(false)
+    }
+  }
+
   const requestDeleteSuggestion = (id: string) => {
     if (deletingSuggestionId) {
       return
@@ -194,6 +298,12 @@ const Suggestions = () => {
       setSuggestions((prev) => prev.filter((suggestion) => suggestion.id !== deletedId))
       setPendingDeleteSuggestionId(null)
       toast.success(body.message || "Suggestion deleted successfully")
+      logActivity({
+        title: "Suggestion Deleted",
+        description: `Deleted suggestion (ID: ${deletedId}).`,
+        action: "delete_suggestion",
+        entity_type: "suggestion",
+      })
     } catch {
       toast.error("Unable to connect to the server. Please try again.")
     } finally {
@@ -268,16 +378,154 @@ const Suggestions = () => {
               key={suggestion.id}
               suggestion={suggestion}
               canModify
+              onView={(id) => {
+                const found = filteredSuggestions.find((s) => s.id === id)
+                if (found) {
+                  setViewSuggestion(found)
+                  setIsViewOpen(true)
+                }
+              }}
+              onEdit={openEditDialog}
               onDelete={deletingSuggestionId ? undefined : requestDeleteSuggestion}
             />
           ))
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-gray-400 text-sm">No suggestions found.</p>
-            <p className="text-gray-300 text-xs mt-1">Try adjusting your search or filter.</p>
+          <div className="col-span-full">
+            <EmptyState
+              message="No suggestions found. Try adjusting your search or filters."
+            />
           </div>
         )}
       </div>
+
+      <Dialog
+        open={isViewOpen}
+        onOpenChange={(open) => {
+          setIsViewOpen(open)
+          if (!open) setViewSuggestion(null)
+        }}
+      >
+        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
+            <DialogTitle>{viewSuggestion?.title ?? "Suggestion Details"}</DialogTitle>
+          </DialogHeader>
+
+          {viewSuggestion ? (
+            <div className="flex-1 overflow-y-auto px-6 pb-4 pt-0 space-y-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Description</span>
+                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{viewSuggestion.description}</p>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Suggested Solution</span>
+                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{viewSuggestion.suggestedSolution}</p>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Category</span>
+                <p className={`text-sm font-medium ${getCategoryColor(viewSuggestion.category)}`}>{viewSuggestion.category}</p>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="shrink-0 flex items-start gap-2 border-t border-gray-100 px-6 py-3">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
+            <span className="text-sm text-gray-500 leading-snug">{viewSuggestion?.location}</span>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isEditOpen}
+        onOpenChange={(open) => {
+          if (!isSubmittingEdit) {
+            setIsEditOpen(open)
+            if (!open) setEditSuggestion(null)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Suggestion</DialogTitle>
+            <DialogDescription>Update the details of your suggestion.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editForm.title}
+                onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                required
+                disabled={isSubmittingEdit}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                rows={4}
+                required
+                disabled={isSubmittingEdit}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-solution">Suggested Solution</Label>
+              <Textarea
+                id="edit-solution"
+                value={editForm.suggestedSolution}
+                onChange={(e) => setEditForm((f) => ({ ...f, suggestedSolution: e.target.value }))}
+                rows={4}
+                required
+                disabled={isSubmittingEdit}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-location">Location</Label>
+              <Input
+                id="edit-location"
+                value={editForm.location}
+                onChange={(e) => setEditForm((f) => ({ ...f, location: e.target.value }))}
+                required
+                disabled={isSubmittingEdit}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-category">Category</Label>
+              <Select
+                value={editForm.category}
+                onValueChange={(val) => setEditForm((f) => ({ ...f, category: val }))}
+                disabled={isSubmittingEdit}
+              >
+                <SelectTrigger id="edit-category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Education", "Employment", "Health", "Sports", "Environment", "Community / Social"].map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditOpen(false)}
+                disabled={isSubmittingEdit}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmittingEdit}>
+                {isSubmittingEdit ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog
         open={!!pendingDeleteSuggestionId}

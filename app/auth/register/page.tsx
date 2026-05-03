@@ -69,6 +69,7 @@ const StepOne = ({handleSubmit, email, agreed, setAgreed, setEmail, isFormValid,
           <Field orientation="horizontal">
             <Checkbox id="terms-checkbox-basic" name="terms-checkbox-basic" checked={agreed} onCheckedChange={setAgreed}
               className='
+              border-theme-blue
               data-[state=checked]:bg-theme-blue
               data-[state=checked]:border-theme-blue
               data-[state=checked]:text-white

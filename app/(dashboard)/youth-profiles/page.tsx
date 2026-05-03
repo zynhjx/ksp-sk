@@ -44,9 +44,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { MoreHorizontalIcon } from "lucide-react"
+import { MoreVerticalIcon } from "lucide-react"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "sonner"
+import { logActivity } from "@/lib/logActivity"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
@@ -118,6 +119,8 @@ const EXCLUDED_EXTRA_KEYS = new Set([
   "email",
   "barangay",
   "status",
+  "bday",
+  "role",
 ])
 
 const formatFieldLabel = (fieldName: string) =>
@@ -136,6 +139,52 @@ const toEditableScalar = (value: unknown): string => {
 
   return ""
 }
+
+const isGenderField = (fieldName: string) => {
+  const normalized = fieldName.toLowerCase()
+  return normalized === "gender" || normalized === "sex"
+}
+
+const GENDER_OPTIONS = ["Male", "Female", "Non-binary"]
+
+const isEmploymentStatusField = (fieldName: string) => {
+  const normalized = fieldName.toLowerCase().replace(/[_\s-]/g, "")
+  return normalized.includes("employment") || normalized === "employmentstatus" || normalized === "workstatus"
+}
+
+const EMPLOYMENT_STATUS_OPTIONS = [
+  "Employed",
+  "Unemployed",
+  "Self-Employed",
+  "Freelancer",
+  "Student",
+  "Retired",
+  "Homemaker",
+  "Part-Time",
+  "Intern/Trainee",
+]
+
+const isEducationLevelField = (fieldName: string) => {
+  const normalized = fieldName.toLowerCase().replace(/[_\s-]/g, "")
+  return (
+    normalized.includes("education") ||
+    normalized === "educationallevel" ||
+    normalized === "educationlevel" ||
+    normalized === "edlevel"
+  )
+}
+
+const EDUCATION_LEVEL_OPTIONS = [
+  "No Formal Education",
+  "Elementary Graduate",
+  "High School Level",
+  "High School Graduate",
+  "Vocational/Trade Course",
+  "Some College",
+  "Bachelor's Degree",
+  "Master's Degree",
+  "Doctorate/PhD",
+]
 
 const isBirthDateField = (fieldName: string) => {
   const normalized = fieldName.toLowerCase()
@@ -224,6 +273,8 @@ const YouthProfilesPage = () => {
   const [isEditConfirmOpen, setIsEditConfirmOpen] = useState(false)
   const [isSuspendOpen, setIsSuspendOpen] = useState(false)
   const [isReactivateOpen, setIsReactivateOpen] = useState(false)
+  const [barangays, setBarangays] = useState<string[]>([])
+  const [loadingBarangays, setLoadingBarangays] = useState(false)
   const [editForm, setEditForm] = useState<EditProfileForm>({
     first_name: "",
     last_name: "",
@@ -363,6 +414,12 @@ const YouthProfilesPage = () => {
           reactivate: "Youth member reactivated",
         }
         toast.success(successMessages[action] ?? "Action applied")
+        logActivity({
+          title: `Youth Member ${action.charAt(0).toUpperCase() + action.slice(1)}d`,
+          description: `Applied "${action}" to ${profile.first_name} ${profile.last_name}.`,
+          action: `${action}_youth_member`,
+          entity_type: "youth_member",
+        })
         return
       }
 
@@ -374,12 +431,39 @@ const YouthProfilesPage = () => {
     }
   }
 
+  const fetchBarangays = useCallback(async () => {
+    if (!API_BASE || barangays.length > 0) return
+    setLoadingBarangays(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/sk/barangays`, {
+        method: "GET",
+        headers: { "x-app-type": "sk" },
+        credentials: "include",
+      })
+      if (!res.ok) return
+      const body = await res.json().catch(() => ({}))
+      const list: string[] = Array.isArray(body.data)
+        ? body.data.map((item: unknown) => {
+            if (typeof item === "string") return item
+            if (item && typeof item === "object" && "name" in item) return String((item as { name: unknown }).name)
+            return String(item)
+          })
+        : []
+      setBarangays(list)
+    } catch {
+      // silently fail; input falls back gracefully
+    } finally {
+      setLoadingBarangays(false)
+    }
+  }, [barangays.length])
+
   const handleViewProfile = (profile: YouthProfile) => {
     setSelectedProfile(profile)
     setIsViewOpen(true)
   }
 
   const handleOpenEditProfile = (profile: YouthProfile) => {
+    void fetchBarangays()
     setSelectedProfile(profile)
     setEditForm({
       first_name: profile.first_name,
@@ -467,6 +551,12 @@ const YouthProfilesPage = () => {
         await fetchProfiles(false)
         setIsEditOpen(false)
         toast.success("Youth profile updated")
+        logActivity({
+          title: "Youth Profile Updated",
+          description: `Updated profile of ${nextFirstName} ${nextLastName}.`,
+          action: "update_youth_member",
+          entity_type: "youth_member",
+        })
         return
       }
 
@@ -575,7 +665,7 @@ const YouthProfilesPage = () => {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="size-8">
-                              <MoreHorizontalIcon />
+                              <MoreVerticalIcon />
                               <span className="sr-only">Open actions</span>
                             </Button>
                           </DropdownMenuTrigger>
@@ -739,13 +829,20 @@ const YouthProfilesPage = () => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="edit-barangay">Barangay</Label>
-                <Input
-                  id="edit-barangay"
+                <Select
                   value={editForm.barangay}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({ ...prev, barangay: event.target.value }))
-                  }
-                />
+                  onValueChange={(value) => setEditForm((prev) => ({ ...prev, barangay: value }))}
+                  disabled={loadingBarangays}
+                >
+                  <SelectTrigger id="edit-barangay">
+                    <SelectValue placeholder={loadingBarangays ? "Loading..." : "Select barangay"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {barangays.map((b) => (
+                      <SelectItem key={b} value={b}>{b}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
@@ -762,20 +859,51 @@ const YouthProfilesPage = () => {
                   {Object.entries(editForm.extraFields).map(([key, value]) => (
                     <div key={key} className="space-y-2">
                       <Label htmlFor={`edit-extra-${key}`}>{formatFieldLabel(key)}</Label>
-                      <Input
-                        id={`edit-extra-${key}`}
-                        type={isBirthDateField(key) ? "date" : "text"}
-                        value={value}
-                        onChange={(event) =>
-                          setEditForm((prev) => ({
-                            ...prev,
-                            extraFields: {
-                              ...prev.extraFields,
-                              [key]: event.target.value,
-                            },
-                          }))
-                        }
-                      />
+                      {(() => {
+                        const opts = isGenderField(key)
+                          ? { options: GENDER_OPTIONS, placeholder: "Select gender" }
+                          : isEmploymentStatusField(key)
+                          ? { options: EMPLOYMENT_STATUS_OPTIONS, placeholder: "Select employment status" }
+                          : isEducationLevelField(key)
+                          ? { options: EDUCATION_LEVEL_OPTIONS, placeholder: "Select education level" }
+                          : null
+
+                        return opts ? (
+                          <Select
+                            value={value}
+                            onValueChange={(val) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                extraFields: { ...prev.extraFields, [key]: val },
+                              }))
+                            }
+                          >
+                            <SelectTrigger id={`edit-extra-${key}`}>
+                              <SelectValue placeholder={opts.placeholder} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {opts.options.map((o) => (
+                                <SelectItem key={o} value={o}>{o}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            id={`edit-extra-${key}`}
+                            type={isBirthDateField(key) ? "date" : "text"}
+                            value={value}
+                            onChange={(event) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                extraFields: {
+                                  ...prev.extraFields,
+                                  [key]: event.target.value,
+                                },
+                              }))
+                            }
+                          />
+                        )
+                      })()}
                     </div>
                   ))}
                 </div>

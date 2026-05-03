@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type ReactNode } from "react";
+import PublicFooter from "@/components/PublicFooter";
 
 const toc = [
   { id: "services", num: "01", title: "Our Services" },
@@ -464,5 +465,6 @@ export default function TermsAndConditions() {
         </div>
       </div>
     </div>
+    <PublicFooter />
   );
 }
