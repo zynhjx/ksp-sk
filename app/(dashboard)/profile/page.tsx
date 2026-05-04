@@ -165,11 +165,9 @@ const ProfilePage = () => {
     const payload = {
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
-      barangay: form.barangay.trim(),
-      position: form.position.trim(),
     }
 
-    if (!payload.first_name || !payload.last_name || !payload.barangay || !payload.position) {
+    if (!payload.first_name || !payload.last_name) {
       toast.error("Please complete all required fields.")
       return
     }
@@ -188,8 +186,6 @@ const ProfilePage = () => {
           formData: {
             firstName: payload.first_name,
             lastName: payload.last_name,
-            barangay: payload.barangay,
-            position: payload.position,
           },
         }),
       })
@@ -353,20 +349,20 @@ const ProfilePage = () => {
                       <Label htmlFor="profile-barangay">Barangay</Label>
                       <Input
                         id="profile-barangay"
-                        value={form.barangay}
-                        onChange={(event) => setForm((prev) => ({ ...prev, barangay: event.target.value }))}
+                        value={toTitleCase(form.barangay)}
                         className="h-10 bg-white"
-                        required
+                        disabled
+                        readOnly
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="profile-position">Position</Label>
                       <Input
                         id="profile-position"
-                        value={form.position}
-                        onChange={(event) => setForm((prev) => ({ ...prev, position: event.target.value }))}
+                        value={toTitleCase(form.position)}
                         className="h-10 bg-white"
-                        required
+                        disabled
+                        readOnly
                       />
                     </div>
                   </div>
@@ -431,7 +427,7 @@ const ProfilePage = () => {
             </div>
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Position</p>
-              <p className="mt-2 text-sm font-medium text-slate-700">{profile?.position ?? "-"}</p>
+              <p className="mt-2 text-sm font-medium text-slate-700">{profile?.position ? toTitleCase(profile.position) : "-"}</p>
             </div>
           </div>
           )}

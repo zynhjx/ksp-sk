@@ -1,6 +1,6 @@
 "use client"
 
-import { Eye, MapPin, MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { Eye, MapPin, MoreVertical, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,40 +12,18 @@ type SuggestionCardProps = {
   suggestion?: {
     id: string
     title: string
-    category: string
     description: string
     suggestedSolution: string
     location: string
   }
   canModify?: boolean
   onView?: (id: string) => void
-  onEdit?: (id: string) => void
   onDelete?: (id: string) => void
-}
-
-export const getCategoryColor = (category: string) => {
-  switch (category) {
-    case "Education":
-      return "text-blue-600"
-    case "Employment":
-      return "text-violet-600"
-    case "Health":
-      return "text-rose-600"
-    case "Sports":
-      return "text-green-600"
-    case "Environment":
-      return "text-teal-600"
-    case "Community / Social":
-      return "text-orange-600"
-    default:
-      return "text-gray-500"
-  }
 }
 
 const mockSuggestion = {
   id: "1",
   title: "Improve Street Lighting in Barangay",
-  category: "Community / Social",
   description:
     "Many areas in our barangay lack adequate street lighting, making it unsafe for residents to walk at night. This poses security risks and impacts quality of life.",
   suggestedSolution:
@@ -57,7 +35,6 @@ const SuggestionCard = ({
   suggestion,
   canModify = false,
   onView,
-  onEdit,
   onDelete,
 }: SuggestionCardProps) => {
   const current = suggestion || mockSuggestion
@@ -68,7 +45,7 @@ const SuggestionCard = ({
       <div className="flex flex-col gap-3 p-4">
         {/* Title + Menu */}
         <div className="flex items-start justify-between gap-2">
-          <h2 className="text-base font-semibold text-gray-900 leading-snug flex-1">
+          <h2 className="text-base font-semibold text-gray-900 leading-snug flex-1 line-clamp-3">
             {current.title}
           </h2>
           <DropdownMenu>
@@ -88,10 +65,6 @@ const SuggestionCard = ({
               </DropdownMenuItem>
               {canModify && (
                 <>
-                  <DropdownMenuItem onClick={() => onEdit?.(current.id)}>
-                    <Pencil size={13} strokeWidth={2} className="mr-2" />
-                    Edit
-                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-red-600 focus:text-red-600"
                     onClick={() => onDelete?.(current.id)}
@@ -123,16 +96,6 @@ const SuggestionCard = ({
           <p className="text-sm text-gray-600 leading-relaxed line-clamp-5">
             {current.suggestedSolution}
           </p>
-        </div>
-
-        {/* Category */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
-            Category
-          </span>
-          <span className={`text-sm font-medium ${getCategoryColor(current.category)}`}>
-            {current.category}
-          </span>
         </div>
 
         {/* Divider */}

@@ -64,20 +64,20 @@ const MobileHeader = () => {
   }
 
   return (
-    <div className="md:hidden fixed bg-theme-blue top-0 right-0 left-0 h-18.75 flex items-center justify-between pr-4">
+    <div className="md:hidden fixed bg-theme-white border-b border-gray-300 top-0 right-0 left-0 h-18.75 flex items-center justify-between pr-4">
       <div className="flex items-center w-18 justify-center">
         <button onClick={() => toggleSidebar()}
           className={twMerge(
-            "p-3 cursor-pointer hover:bg-white/10 rounded-2xl border-none",
+            "p-3 cursor-pointer hover:bg-slate-100 rounded-2xl border-none",
             isOpen && "ml-auto"
           )
         }>
-          <Menu color="#F9FAFB" size={24}/>
+          <Menu color="#1e40af" size={24}/>
         </button>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="h-10 w-10 rounded-lg bg-white hover:bg-white/90 flex items-center justify-center text-theme-blue text-sm font-bold cursor-pointer">
+          <button className="h-10 w-10 rounded-lg bg-theme-blue hover:bg-theme-blue/90 flex items-center justify-center text-white text-sm font-bold cursor-pointer">
             {userInitial}
           </button>
         </DropdownMenuTrigger>

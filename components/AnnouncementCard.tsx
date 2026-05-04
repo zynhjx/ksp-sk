@@ -92,17 +92,12 @@ const AnnouncementCard = ({ announcement, onView, onDelete }: AnnouncementCardPr
             {getTypeIcon(announcement.type)}
           </div>
 
-          {/* Title + content + badge + menu */}
-          <div className="flex flex-1 flex-col gap-4 min-w-0">
+          {/* Title row + description */}
+          <div className="flex flex-1 flex-col gap-2 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h2 className="text-base font-semibold text-gray-900 leading-snug">
-                  {announcement.title}
-                </h2>
-                <p className="mt-2 text-sm text-gray-600 leading-relaxed line-clamp-3 wrap-break-word">
-                  {announcement.content}
-                </p>
-              </div>
+              <h2 className="text-base font-semibold text-gray-900 leading-snug min-w-0">
+                {announcement.title}
+              </h2>
               <div className="flex items-start gap-2 shrink-0">
                 <span
                   className={`inline-flex shrink-0 rounded-2xl border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] ${getTypeColor(
@@ -111,27 +106,30 @@ const AnnouncementCard = ({ announcement, onView, onDelete }: AnnouncementCardPr
                 >
                   {announcement.type}
                 </span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-7 text-gray-400 hover:text-gray-700 -mt-0.5">
-                        <MoreVertical size={16} />
-                        <span className="sr-only">More actions</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-36">
-                      <DropdownMenuItem onClick={() => onView?.(announcement)}>
-                        <Eye size={13} strokeWidth={2} className="mr-2" />
-                        View
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem variant="destructive" onClick={() => onDelete?.(announcement)}>
-                        <Trash2 size={13} strokeWidth={2} className="mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-7 text-gray-400 hover:text-gray-700 -mt-0.5">
+                      <MoreVertical size={16} />
+                      <span className="sr-only">More actions</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-36">
+                    <DropdownMenuItem onClick={() => onView?.(announcement)}>
+                      <Eye size={13} strokeWidth={2} className="mr-2" />
+                      View
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={() => onDelete?.(announcement)}>
+                      <Trash2 size={13} strokeWidth={2} className="mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
+            <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 wrap-break-word">
+              {announcement.content}
+            </p>
           </div>
         </div>
 

@@ -413,9 +413,15 @@ const YouthProfilesPage = () => {
           suspend: "Youth member suspended",
           reactivate: "Youth member reactivated",
         }
+        const actionTitles: Record<string, string> = {
+          approve: "Approved",
+          decline: "Declined",
+          suspend: "Suspended",
+          reactivate: "Reactivated",
+        }
         toast.success(successMessages[action] ?? "Action applied")
         logActivity({
-          title: `Youth Member ${action.charAt(0).toUpperCase() + action.slice(1)}d`,
+          title: `Youth Member ${actionTitles[action] ?? (action.charAt(0).toUpperCase() + action.slice(1))}`,
           description: `Applied "${action}" to ${profile.first_name} ${profile.last_name}.`,
           action: `${action}_youth_member`,
           entity_type: "youth_member",

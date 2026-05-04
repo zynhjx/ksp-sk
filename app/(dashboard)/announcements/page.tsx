@@ -455,7 +455,9 @@ const Announcements = () => {
       >
         <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden">
           <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
-            <DialogTitle>{selectedAnnouncement?.title ?? "Announcement"}</DialogTitle>
+            <DialogTitle className="leading-snug max-h-[calc(5*1.375rem)] overflow-y-auto">
+              {selectedAnnouncement?.title ?? "Announcement"}
+            </DialogTitle>
           </DialogHeader>
 
           {selectedAnnouncement ? (
