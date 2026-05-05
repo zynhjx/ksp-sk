@@ -30,6 +30,7 @@ const mockSuggestion = {
   suggestedSolution:
     "Install LED street lights on major streets and pathways. Consider solar-powered options for cost efficiency and sustainability.",
   location: "Main Street, Various Areas",
+  createdAt: undefined as string | undefined,
 }
 
 const SuggestionCard = ({

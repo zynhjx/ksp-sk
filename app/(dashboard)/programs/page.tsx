@@ -358,6 +358,7 @@ const Programs = () => {
         location: String(createdProgram.location || location),
         description: String(createdProgram.description || description),
         createdAt: String(createdProgram.createdAt || createdProgram.created_at || new Date().toISOString()),
+        updatedAt: String(createdProgram.updatedAt || createdProgram.updated_at || new Date().toISOString()),
         participants: Number(createdProgram.participants || 0),
         startDate: normalizedStartDate,
         untilDate: normalizedEndDate,
