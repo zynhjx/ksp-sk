@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
 import Link from "next/link";
-import {ChevronRight, UserRound, Zap, BadgeCheck} from "lucide-react";
+import {ChevronRight, Mail, KeyRound, ClipboardList, Clock, Users, Megaphone, MessageSquareText, LayoutDashboard} from "lucide-react";
 import PublicFooter from "@/components/PublicFooter";
 
 const Section = ({ children, className, containerClassName, id } : { children: React.ReactNode, className?: string, containerClassName?: string, id?: string }) => {
@@ -117,76 +117,43 @@ const LandingPage = () => {
                 <Section id="features">
                     <div className="flex flex-col items-center mb-16 text-center">
                         <span className="text-sm font-semibold uppercase tracking-widest text-theme-blue">Features</span>
-                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 my-6">Why Join us?</h2>
+                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 my-6">Built for SK Officials</h2>
                         <div className="w-20 h-1.5 bg-theme-blue rounded-full mb-6"></div>
                         <p className="text-gray-600 max-w-2xl text-lg">
-                            Being registered means you&apos;re counted, heard, and connected to programs that directly benefit you and your community.
+                            Everything you need to manage youth data, run programs, and serve your barangay — all in one portal.
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>}
-                            title="Your Own Digital Profile"
-                            description="Create and manage your personal youth profile that officially represents you in your barangay's records — all in one place."
+                            icon={<Users className="w-6 h-6" />}
+                            title="Youth Data Management"
+                            description="Register and manage youth profiles in your barangay. Keep records organized, searchable, and always up to date."
                         />
                         <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>}
-                            title="Access Programs & Opportunities"
-                            description="Stay updated on livelihood, scholarship, sports, and community programs available for the youth in your area."
+                            icon={<LayoutDashboard className="w-6 h-6" />}
+                            title="Programs & Initiatives"
+                            description="Create and track livelihood, sports, scholarship, and community programs tailored for the youth of your barangay."
                         />
                         <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>}
-                            title="Safe & Private"
-                            description="Your personal information is protected with secure access. Only you and authorized officials can view your data."
+                            icon={<Megaphone className="w-6 h-6" />}
+                            title="Announcements"
+                            description="Broadcast important updates, events, and notices to keep your community informed and engaged at all times."
                         />
-                        {/* <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>}
-                            title="Automated Reporting"
-                            description="Generate reports with a single click, saving hours of manual paperwork."
-                        /> */}
                         <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>}
-                            title="Be Heard by Your Leaders"
-                            description="Share feedback on programs and initiatives directly with your SK officials so decisions are made with you in mind."
+                            icon={<MessageSquareText className="w-6 h-6" />}
+                            title="Suggestions & Feedback"
+                            description="Receive and review community suggestions to make informed, data-driven decisions for the youth of your barangay."
                         />
-                        {/* <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>}
-                            title="Rapid Deployment"
-                            description="Get your barangay set up and running in less than 30 minutes with our easy onboarding."
-                        /> */}
                     </div>
-
-                    {/* <div className="grid md:grid-cols-2 gap-8">
-                        <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>}
-                            title="Your Own Digital Profile"
-                            description="Create and manage your personal youth profile that represents you in your barangay's records — all in one place."
-                        />
-                        <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>}
-                            title="Access Programs & Opportunities"
-                            description="Stay updated on livelihood, scholarship, sports, and community programs available for the youth in your area."
-                        />
-                        <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>}
-                            title="Be Heard by Your Leaders"
-                            description="Share feedback on programs and initiatives directly with your SK officials so decisions are made with you in mind."
-                        />
-                        <FeatureCard
-                            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>}
-                            title="Safe & Private"
-                            description="Your personal information is protected with enterprise-level security. Only authorized officials can access your data."
-                        />
-                    </div> */}
                 </Section>
 
                 {/* How It Works Section */}
-                <Section id="how-it-works" className="bg-gray-50/50">
+                <Section id="how-it-works" className="bg-gray-50/50" containerClassName="max-w-screen-2xl">
                     <div className="flex flex-col items-center mb-14 text-center">
                         <span className="text-sm font-semibold uppercase tracking-widest text-theme-blue">How It Works</span>
                         <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mt-3 mb-4 leading-tight">
-                            Joining is <span className="text-theme-blue">Simple</span>
+                            Getting started is <span className="text-theme-blue">Easy</span>
                         </h2>
                         <div className="w-16 h-1.5 bg-theme-blue rounded-full"></div>
                     </div>
@@ -194,41 +161,53 @@ const LandingPage = () => {
                     <div className="relative flex flex-col md:flex-row items-stretch gap-6 md:gap-0">
 
                         {/* Connector Line */}
-                        <div className="hidden md:block absolute top-7.5 left-[calc(16.67%)] right-[calc(16.67%)] h-px border-t-2 border-dashed border-blue-200 z-0" />
+                        <div className="hidden md:block absolute top-7.5 left-[12.5%] right-[12.5%] h-px border-t-2 border-dashed border-blue-200 z-0" />
 
                         {/* Step 1 */}
-                        <div className="flex-1 flex flex-col items-center text-center px-6 relative z-10">
+                        <div className="flex-1 flex flex-col items-center text-center px-4 relative z-10">
                             <div className="w-15 h-15 rounded-2xl bg-theme-blue text-white flex items-center justify-center mb-6 shadow-lg shadow-blue-900/20">
-                                <UserRound className="w-8 h-8" />
+                                <Mail className="w-8 h-8" />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-widest text-theme-blue mb-2">Step 01</span>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Create Your Profile</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Register with Email</h3>
                             <p className="text-gray-500 leading-relaxed text-sm">
-                                Sign up and fill in your basic info. It only takes a few minutes and no documents needed to get started.
+                                Enter your official email address and agree to the Terms of Use. A one-time password will be sent to your inbox.
                             </p>
                         </div>
 
                         {/* Step 2 */}
-                        <div className="flex-1 flex flex-col items-center text-center px-6 relative z-10">
+                        <div className="flex-1 flex flex-col items-center text-center px-4 relative z-10">
                             <div className="w-15 h-15 rounded-2xl bg-theme-white border-2 border-blue-100 text-theme-blue flex items-center justify-center mb-6 shadow-sm">
-                                <BadgeCheck className="w-8 h-8" />
+                                <KeyRound className="w-8 h-8" />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-widest text-theme-blue mb-2">Step 02</span>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Get Officially Registered</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Verify Your Email</h3>
                             <p className="text-gray-500 leading-relaxed text-sm">
-                                Your profile gets recorded in your barangay&apos;s youth database, making you officially recognized by your SK.
+                                Enter the 6-digit OTP sent to your inbox to confirm your identity and proceed to the next step.
                             </p>
                         </div>
 
                         {/* Step 3 */}
-                        <div className="flex-1 flex flex-col items-center text-center px-6 relative z-10">
+                        <div className="flex-1 flex flex-col items-center text-center px-4 relative z-10">
                             <div className="w-15 h-15 rounded-2xl bg-theme-white border-2 border-blue-100 text-theme-blue flex items-center justify-center mb-6 shadow-sm">
-                                <Zap className="w-8 h-8" />
+                                <ClipboardList className="w-8 h-8" />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-widest text-theme-blue mb-2">Step 03</span>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Access Opportunities</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Complete Your Profile</h3>
                             <p className="text-gray-500 leading-relaxed text-sm">
-                                Unlock eligibility for livelihood programs, events, and more — all tailored for the youth in your community.
+                                Fill in your name, barangay, and SK position, then set a secure password for your account.
+                            </p>
+                        </div>
+
+                        {/* Step 4 */}
+                        <div className="flex-1 flex flex-col items-center text-center px-4 relative z-10">
+                            <div className="w-15 h-15 rounded-2xl bg-theme-white border-2 border-blue-100 text-theme-blue flex items-center justify-center mb-6 shadow-sm">
+                                <Clock className="w-8 h-8" />
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-widest text-theme-blue mb-2">Step 04</span>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Await Admin Approval</h3>
+                            <p className="text-gray-500 leading-relaxed text-sm">
+                                Your account is reviewed by the system admin. Once approved, you can sign in and access the SK portal.
                             </p>
                         </div>
 
@@ -240,15 +219,15 @@ const LandingPage = () => {
                         <div>
                             <span className="text-sm font-semibold uppercase tracking-widest text-theme-blue">About the Platform</span>
                             <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mt-3 mb-4 leading-tight">
-                                A Platform Made <span className="text-theme-blue">For You</span>
+                                A Platform Made <span className="text-theme-blue">for SK</span>
                             </h2>
                             <div className="w-16 h-1.5 bg-theme-blue rounded-full mx-auto mb-6"></div>
                         </div>
                         <p className="text-gray-600 text-lg leading-relaxed">
-                            This is your space as a young member of the community. Register once, and you&apos;re officially part of your barangay&apos;s youth records — making you eligible for programs and opportunities meant for you.
+                            This portal is designed exclusively for Sangguniang Kabataan officials to efficiently manage youth data, coordinate programs, and serve their community — all from one place.
                         </p>
                         <p className="text-gray-600 text-lg leading-relaxed">
-                            No paperwork, no long lines. Just a simple profile that represents you and keeps you connected to what&apos;s happening in your community.
+                            No more manual records or scattered spreadsheets. Register as an SK official, get approved, and gain access to a complete suite of tools built for barangay youth governance.
                         </p>
                     </div>
                 </Section>
@@ -259,13 +238,13 @@ const LandingPage = () => {
                     <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-blue-400/20 rounded-full blur-[100px]"></div>
 
                     <div className="flex flex-col items-center text-center relative z-10 py-10">
-                        <h2 className="text-3xl md:text-5xl  mb-8 font-bold max-w-3xl leading-tight">Be seen. Be heard. Be part of your community.</h2>
+                        <h2 className="text-3xl md:text-5xl  mb-8 font-bold max-w-3xl leading-tight">Empower the youth. Strengthen your barangay.</h2>
                         <p className="text-xl text-blue-100 mb-12 max-w-2xl">
-                            Your voice matters. Take part in programs, share your ideas, and help build a better barangay.
+                            Register as an SK official and start managing youth profiles, programs, and announcements for your community today.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Link href="/auth/register" className="px-10 py-5 rounded-2xl bg-theme-white text-theme-blue font-bold text-xl hover:shadow-2xl hover:bg-blue-50 transition cursor-pointer text-center">
-                                Get Started for Free
+                                Register as SK Official
                             </Link>
                         </div>
                     </div>

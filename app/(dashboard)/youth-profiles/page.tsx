@@ -846,7 +846,7 @@ const YouthProfilesPage = () => {
                 <Select
                   value={editForm.barangay}
                   onValueChange={(value) => setEditForm((prev) => ({ ...prev, barangay: value }))}
-                  disabled={loadingBarangays}
+                  disabled
                 >
                   <SelectTrigger id="edit-barangay">
                     <SelectValue placeholder={loadingBarangays ? "Loading..." : "Select barangay"} />

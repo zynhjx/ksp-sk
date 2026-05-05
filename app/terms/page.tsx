@@ -58,7 +58,7 @@ const SectionTitle = ({ id, num, children }: SectionTitleProps) => (
     id={id}
     className="flex items-center gap-3 text-xl font-bold text-slate-900 mt-12 mb-4 scroll-mt-24 border-b border-slate-200 pb-3"
   >
-    <span className="text-xs font-mono font-semibold text-theme-dark-blue bg-theme-dark-blue/10 px-2 py-1 rounded tracking-widest shrink-0">
+    <span className="text-xs font-mono font-semibold text-theme-blue bg-theme-blue/10 px-2 py-1 rounded tracking-widest shrink-0">
       {num}
     </span>
     <span>{children}</span>
@@ -77,7 +77,7 @@ const BulletList = ({ items }: BulletListProps) => (
   <ul className="space-y-2 mb-4 ml-1">
     {items.map((item, i) => (
       <li key={i} className="flex gap-3 text-sm text-slate-600 leading-relaxed">
-        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-theme-dark-blue shrink-0" />
+        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-theme-blue shrink-0" />
         <span>{item}</span>
       </li>
     ))}
@@ -87,7 +87,7 @@ const BulletList = ({ items }: BulletListProps) => (
 const Email = ({ address } : { address: string }) => (
   <a
     href={`mailto:${address}`}
-    className="text-theme-dark-blue hover:underline font-medium transition-colors"
+    className="text-theme-blue hover:underline font-medium transition-colors"
   >
     {address}
   </a>
@@ -97,6 +97,7 @@ export default function TermsAndConditions() {
   const [tocOpen, setTocOpen] = useState(false);
 
   return (
+    <>
     <div className="min-h-screen bg-slate-50 font-sans">
       {/* Header */}
       {/* <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
@@ -146,7 +147,7 @@ export default function TermsAndConditions() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
         {/* Hero */}
-        <div className="bg-linear-to-br from-theme-dark-blue/70 to-theme-dark-blue rounded-2xl p-8 sm:p-12 mb-10 text-white relative overflow-hidden">
+        <div className="bg-linear-to-br from-theme-blue/70 to-theme-blue rounded-2xl p-8 sm:p-12 mb-10 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10"
             style={{
               backgroundImage: `radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
@@ -185,9 +186,9 @@ export default function TermsAndConditions() {
                   <a
                     key={item.id}
                     href={`#${item.id}`}
-                    className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-theme-dark-blue/10 group transition-colors"
+                    className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-theme-blue/10 group transition-colors"
                   >
-                    <span className="text-xs font-mono text-theme-dark-blue shrink-0 w-5">
+                    <span className="text-xs font-mono text-theme-blue shrink-0 w-5">
                       {item.num}
                     </span>
                     <span className="text-xs text-slate-500 group-hover:text-slate-800 leading-tight transition-colors">
@@ -220,7 +221,7 @@ export default function TermsAndConditions() {
                 We are <strong>Kabataan Statistical Profile</strong>, doing business as <strong>KSP</strong>, a company registered in the Philippines at Purok Bagong Silang, Barangay San Miguel, Puerto Princesa City, Palawan 5300.
               </P>
               <P>
-                We operate the website <a href="https://kabataanprofile.com" className="text-theme-dark-blue font-medium hover:underline">kabataanprofile.com </a> and related products and services (collectively, the &quot;Services&quot;).
+                We operate the website <a href="https://kabataanprofile.com" className="text-theme-blue font-medium hover:underline">kabataanprofile.com </a> and related products and services (collectively, the &quot;Services&quot;).
               </P>
               <P>
                 KSP is a web-based platform designed to connect youth and SK officials. It allows users to manage programs, submit suggestions, and view announcements. The platform aims to improve communication and engagement within the community.
@@ -439,14 +440,14 @@ export default function TermsAndConditions() {
               {/* 28 */}
               <SectionTitle id="contact" num="28">Contact Us</SectionTitle>
               <P>In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at:</P>
-              <div className="bg-theme-dark-blue/10 border border-theme-dark-blue/30 rounded-xl p-5 mt-2">
-                <p className="font-bold text-theme-dark-blue text-sm">Kabataan Statistical Profile</p>
-                <p className="text-theme-dark-blue text-sm mt-1">Purok Bagong Silang, Barangay San Miguel</p>
-                <p className="text-theme-dark-blue text-sm">Puerto Princesa City, Palawan 5300</p>
-                <p className="text-theme-dark-blue text-sm">Philippines</p>
+              <div className="bg-theme-blue/10 border border-theme-blue/30 rounded-xl p-5 mt-2">
+                <p className="font-bold text-theme-blue text-sm">Kabataan Statistical Profile</p>
+                <p className="text-theme-blue text-sm mt-1">Purok Bagong Silang, Barangay San Miguel</p>
+                <p className="text-theme-blue text-sm">Puerto Princesa City, Palawan 5300</p>
+                <p className="text-theme-blue text-sm">Philippines</p>
                 <a
                   href="mailto:support@kabataanprofile.com"
-                  className="inline-flex items-center gap-2 mt-3 text-sm font-semibold text-theme-dark-blue hover:underline transition-colors"
+                  className="inline-flex items-center gap-2 mt-3 text-sm font-semibold text-theme-blue hover:underline transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -466,5 +467,6 @@ export default function TermsAndConditions() {
       </div>
     </div>
     <PublicFooter />
+    </>
   );
 }

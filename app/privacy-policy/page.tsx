@@ -109,6 +109,7 @@ const ExternalLink = ({ href, children }: ExternalLinkProps) => (
 export default function PrivacyPolicy() {
 
   return (
+    <>
     <div className="min-h-screen bg-slate-50 font-sans">
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
@@ -365,5 +366,6 @@ export default function PrivacyPolicy() {
       </div>
     </div>
     <PublicFooter />
+    </>
   );
 }

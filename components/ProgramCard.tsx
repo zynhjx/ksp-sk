@@ -159,8 +159,8 @@ const ProgramCard = ({ program, onView, onEdit, onDelete }: ProgramCardProps) =>
             <span className="text-[11px] font-medium uppercase tracking-wider text-gray-400">Category</span>
             <Badge value={program.category} colorClass={getCategoryColor(program.category)} />
           </div>
-          <MetaItem label="Created" value={formatDate(program.createdAt)} />
-          <MetaItem label="Last Modified" value={formatDate(program.updatedAt)} />
+          <MetaItem label="Created" value={formatDateTime(program.createdAt)} />
+          <MetaItem label="Last Modified" value={formatDateTime(program.updatedAt)} />
           <MetaItem label="Start" value={formatDateTime(program.startDate)} />
           <MetaItem label="Until" value={formatDateTime(program.untilDate)} />
         </div>

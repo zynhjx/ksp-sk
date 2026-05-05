@@ -310,7 +310,7 @@ const Suggestions = () => {
 
               {viewSuggestion.createdAt && (
                 <p className="text-xs text-gray-400">
-                  Submitted {new Date(viewSuggestion.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+                  Submitted {new Date(viewSuggestion.createdAt).toLocaleString("en-PH", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true })}
                 </p>
               )}
             </div>

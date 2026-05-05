@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { CircleUser, LogOutIcon } from "lucide-react"
 import Image from "next/image"
+import { apiFetch } from "@/lib/apiFetch"
 import ProfileDialog from "@/components/ProfileDialog"
 
 const toTitleCase = (str: string = "") => {
@@ -52,13 +53,7 @@ const MobileHeader = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_EXPRESS_API_URL}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "x-app-type": "sk",
-        },
-      })
+      await apiFetch("/api/auth/logout", { method: "POST" })
     } catch (error) {
       console.error("Logout failed:", error)
     } finally {

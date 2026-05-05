@@ -21,6 +21,7 @@ import { twMerge } from 'tailwind-merge';
 import { useSidebar } from "@/context/SidebarContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/apiFetch";
 import { useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -43,6 +44,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import ProfileDialog from "@/components/ProfileDialog"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const toTitleCase = (str: string = "") => {
   return str
@@ -98,13 +100,7 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_EXPRESS_API_URL}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include", // include cookies if using session/cookie auth
-        headers: {
-          "x-app-type": "sk",
-        },
-      });
+      await apiFetch("/api/auth/logout", { method: "POST" });
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
@@ -154,21 +150,30 @@ const Sidebar = () => {
         <ul className={"flex flex-col gap-y-3"}>
           {skNavs.map((nav: {name: string, icon: LucideIcon, path: string}) => (
             <li key={nav.name}>
-              <Link href={nav.path}
-                onClick={isMobile ? () => closeSidebar() : undefined}
-                className={twMerge(
-                "flex gap-x-4 p-3 rounded-xl items-center",
-                pathname !== nav.path && "hover:bg-theme-blue/20",
-                pathname === nav.path && "bg-theme-blue text-white"
-              )}>
-                <nav.icon
-                  size={24}
-                />
-                <span className={twMerge(!isOpen && "hidden", "text-sm")}>{nav.name}</span>
-                {pathname === nav.path && isOpen && (
-                  <ChevronRight size={20} color={"white"} className={"ml-auto"}/>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link href={nav.path}
+                    onClick={isMobile ? () => closeSidebar() : undefined}
+                    className={twMerge(
+                    "flex gap-x-4 p-3 rounded-xl items-center",
+                    pathname !== nav.path && "hover:bg-theme-blue/20",
+                    pathname === nav.path && "bg-theme-blue text-white"
+                  )}>
+                    <nav.icon
+                      size={24}
+                    />
+                    <span className={twMerge(!isOpen && "hidden", "text-sm")}>{nav.name}</span>
+                    {pathname === nav.path && isOpen && (
+                      <ChevronRight size={20} color={"white"} className={"ml-auto"}/>
+                    )}
+                  </Link>
+                </TooltipTrigger>
+                {!isOpen && (
+                  <TooltipContent side="right">
+                    {nav.name}
+                  </TooltipContent>
                 )}
-              </Link>
+              </Tooltip>
             </li>
           ))}
         </ul>

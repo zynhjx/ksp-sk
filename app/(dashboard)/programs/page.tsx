@@ -137,13 +137,17 @@ const Programs = () => {
   const [newCategory, setNewCategory] = useState("Health")
   const [newLocation, setNewLocation] = useState("")
   const [newStartDate, setNewStartDate] = useState("")
+  const [newStartTime, setNewStartTime] = useState("00:00")
   const [newEndDate, setNewEndDate] = useState("")
+  const [newEndTime, setNewEndTime] = useState("00:00")
   const [editTitle, setEditTitle] = useState("")
   const [editDescription, setEditDescription] = useState("")
   const [editCategory, setEditCategory] = useState("Health")
   const [editLocation, setEditLocation] = useState("")
   const [editStartDate, setEditStartDate] = useState("")
+  const [editStartTime, setEditStartTime] = useState("00:00")
   const [editEndDate, setEditEndDate] = useState("")
+  const [editEndTime, setEditEndTime] = useState("00:00")
 
   const getProgramStatus = (startIso: string, endIso: string) => {
     const now = Date.now()
@@ -158,17 +162,21 @@ const Programs = () => {
 
   const toIsoDate = (value: string) => new Date(value).toISOString()
 
-  const toDateTimeInput = (value: string) => {
+  const toDateInput = (value: string) => {
     const parsed = new Date(value)
     if (Number.isNaN(parsed.getTime())) return ""
-
     const year = parsed.getFullYear()
     const month = String(parsed.getMonth() + 1).padStart(2, "0")
     const day = String(parsed.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
+
+  const toTimeInput = (value: string) => {
+    const parsed = new Date(value)
+    if (Number.isNaN(parsed.getTime())) return "00:00"
     const hours = String(parsed.getHours()).padStart(2, "0")
     const minutes = String(parsed.getMinutes()).padStart(2, "0")
-
-    return `${year}-${month}-${day}T${hours}:${minutes}`
+    return `${hours}:${minutes}`
   }
 
   const normalizeProgram = (value: RawProgram): Program => {
@@ -260,7 +268,9 @@ const Programs = () => {
     setNewCategory("Health")
     setNewLocation("")
     setNewStartDate("")
+    setNewStartTime("00:00")
     setNewEndDate("")
+    setNewEndTime("00:00")
   }
 
   const handleCreateProgram = async (event: FormEvent<HTMLFormElement>) => {
@@ -280,8 +290,8 @@ const Programs = () => {
       return
     }
 
-    const startIso = toIsoDate(newStartDate)
-    const endIso = toIsoDate(newEndDate)
+    const startIso = toIsoDate(`${newStartDate}T${newStartTime || "00:00"}`)
+    const endIso = toIsoDate(`${newEndDate}T${newEndTime || "00:00"}`)
 
     if (Number.isNaN(new Date(startIso).getTime()) || Number.isNaN(new Date(endIso).getTime())) {
       toast.error("Please enter valid start and end dates.")
@@ -381,8 +391,10 @@ const Programs = () => {
     setEditDescription(program.description)
     setEditCategory(program.category)
     setEditLocation(program.location)
-    setEditStartDate(toDateTimeInput(program.startDate))
-    setEditEndDate(toDateTimeInput(program.untilDate))
+    setEditStartDate(toDateInput(program.startDate))
+    setEditStartTime(toTimeInput(program.startDate))
+    setEditEndDate(toDateInput(program.untilDate))
+    setEditEndTime(toTimeInput(program.untilDate))
     setIsEditOpen(true)
   }
 
@@ -405,8 +417,8 @@ const Programs = () => {
       return
     }
 
-    const startIso = toIsoDate(editStartDate)
-    const endIso = toIsoDate(editEndDate)
+    const startIso = toIsoDate(`${editStartDate}T${editStartTime || "00:00"}`)
+    const endIso = toIsoDate(`${editEndDate}T${editEndTime || "00:00"}`)
 
     if (Number.isNaN(new Date(startIso).getTime()) || Number.isNaN(new Date(endIso).getTime())) {
       toast.error("Please enter valid start and end dates.")
@@ -653,8 +665,10 @@ const Programs = () => {
                     onChange={(event) => setNewTitle(event.target.value)}
                     placeholder="Enter program title"
                     className="h-10 bg-white"
+                    maxLength={150}
                     required
                   />
+                  <p className={`text-xs text-right ${newTitle.length >= 150 ? "text-red-500" : "text-gray-400"}`}>{newTitle.length}/150</p>
                 </div>
 
                 <div className="space-y-2">
@@ -697,29 +711,46 @@ const Programs = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div className="space-y-2">
-                    <Label htmlFor="program-start-date">Start Date</Label>
-                    <Input
-                      id="program-start-date"
-                      type="datetime-local"
-                      value={newStartDate}
-                      onChange={(event) => setNewStartDate(event.target.value)}
-                      className="h-10 bg-white"
-                      required
-                    />
+                    <Label>Start Date &amp; Time</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        id="program-start-date"
+                        type="date"
+                        value={newStartDate}
+                        onChange={(event) => setNewStartDate(event.target.value)}
+                        className="h-10 bg-white"
+                        required
+                      />
+                      <Input
+                        id="program-start-time"
+                        type="time"
+                        value={newStartTime}
+                        onChange={(event) => setNewStartTime(event.target.value)}
+                        className="h-10 bg-white"
+                      />
+                    </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="program-end-date">End Date</Label>
-                    <Input
-                      id="program-end-date"
-                      type="datetime-local"
-                      value={newEndDate}
-                      onChange={(event) => setNewEndDate(event.target.value)}
-                      className="h-10 bg-white"
-                      required
-                    />
+                    <Label>End Date &amp; Time</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        id="program-end-date"
+                        type="date"
+                        value={newEndDate}
+                        onChange={(event) => setNewEndDate(event.target.value)}
+                        className="h-10 bg-white"
+                        required
+                      />
+                      <Input
+                        id="program-end-time"
+                        type="time"
+                        value={newEndTime}
+                        onChange={(event) => setNewEndTime(event.target.value)}
+                        className="h-10 bg-white"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -804,8 +835,10 @@ const Programs = () => {
                 onChange={(event) => setEditTitle(event.target.value)}
                 placeholder="Enter program title"
                 className="h-10 bg-white"
+                maxLength={150}
                 required
               />
+              <p className={`text-xs text-right ${editTitle.length >= 150 ? "text-red-500" : "text-gray-400"}`}>{editTitle.length}/150</p>
             </div>
 
             <div className="space-y-2">
@@ -848,29 +881,46 @@ const Programs = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="edit-program-start-date">Start Date</Label>
-                <Input
-                  id="edit-program-start-date"
-                  type="datetime-local"
-                  value={editStartDate}
-                  onChange={(event) => setEditStartDate(event.target.value)}
-                  className="h-10 bg-white"
-                  required
-                />
+                <Label>Start Date &amp; Time</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    id="edit-program-start-date"
+                    type="date"
+                    value={editStartDate}
+                    onChange={(event) => setEditStartDate(event.target.value)}
+                    className="h-10 bg-white"
+                    required
+                  />
+                  <Input
+                    id="edit-program-start-time"
+                    type="time"
+                    value={editStartTime}
+                    onChange={(event) => setEditStartTime(event.target.value)}
+                    className="h-10 bg-white"
+                  />
+                </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="edit-program-end-date">End Date</Label>
-                <Input
-                  id="edit-program-end-date"
-                  type="datetime-local"
-                  value={editEndDate}
-                  onChange={(event) => setEditEndDate(event.target.value)}
-                  className="h-10 bg-white"
-                  required
-                />
+                <Label>End Date &amp; Time</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    id="edit-program-end-date"
+                    type="date"
+                    value={editEndDate}
+                    onChange={(event) => setEditEndDate(event.target.value)}
+                    className="h-10 bg-white"
+                    required
+                  />
+                  <Input
+                    id="edit-program-end-time"
+                    type="time"
+                    value={editEndTime}
+                    onChange={(event) => setEditEndTime(event.target.value)}
+                    className="h-10 bg-white"
+                  />
+                </div>
               </div>
             </div>
 
@@ -914,13 +964,13 @@ const Programs = () => {
                 <div className="rounded-lg bg-slate-50 p-3">
                   <p className="text-xs text-slate-500">Created</p>
                   <p className="mt-1 text-sm font-medium text-slate-800">
-                    {new Date(selectedProgram.createdAt).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    {new Date(selectedProgram.createdAt).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
                   </p>
                 </div>
                 <div className="rounded-lg bg-slate-50 p-3">
                   <p className="text-xs text-slate-500">Last Modified</p>
                   <p className="mt-1 text-sm font-medium text-slate-800">
-                    {new Date(selectedProgram.updatedAt).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    {new Date(selectedProgram.updatedAt).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
                   </p>
                 </div>
                 <div className="rounded-lg bg-slate-50 p-3">
