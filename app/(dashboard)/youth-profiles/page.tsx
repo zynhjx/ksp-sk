@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { apiFetch } from "@/lib/apiFetch"
 import Title from "@/components/Title"
 import { Button } from "@/components/ui/button"
 import {
@@ -44,7 +45,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { MoreVerticalIcon } from "lucide-react"
+import { BadgeCheckIcon, EyeIcon, MoreVerticalIcon, PencilIcon, RefreshCwIcon, UserMinusIcon, UserXIcon } from "lucide-react"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "sonner"
 import { logActivity } from "@/lib/logActivity"
@@ -289,7 +290,7 @@ const YouthProfilesPage = () => {
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/sk/youth-profiles`, {
+        const res = await apiFetch(`${API_BASE}/api/sk/youth-profiles`, {
           method: "GET",
           headers: { "x-app-type": "sk" },
           credentials: "include",
@@ -366,7 +367,7 @@ const YouthProfilesPage = () => {
 
     try {
       for (const targetUserId of idCandidates) {
-        const res = await fetch(`${API_BASE}/api/sk/youth-members/${targetUserId}/${action}`, {
+        const res = await apiFetch(`${API_BASE}/api/sk/youth-members/${targetUserId}/${action}`, {
           method: "PATCH",
           headers: {
             "x-app-type": "sk",
@@ -422,7 +423,7 @@ const YouthProfilesPage = () => {
         toast.success(successMessages[action] ?? "Action applied")
         logActivity({
           title: `Youth Member ${actionTitles[action] ?? (action.charAt(0).toUpperCase() + action.slice(1))}`,
-          description: `Applied "${action}" to ${profile.first_name} ${profile.last_name}.`,
+          description: `Applied "${action}" to ${profile.email}.`,
           action: `${action}_youth_member`,
           entity_type: "youth_member",
         })
@@ -441,7 +442,7 @@ const YouthProfilesPage = () => {
     if (!API_BASE || barangays.length > 0) return
     setLoadingBarangays(true)
     try {
-      const res = await fetch(`${API_BASE}/api/sk/barangays`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/barangays`, {
         method: "GET",
         headers: { "x-app-type": "sk" },
         credentials: "include",
@@ -517,7 +518,7 @@ const YouthProfilesPage = () => {
 
     try {
       for (const targetUserId of idCandidates) {
-        const res = await fetch(`${API_BASE}/api/sk/youth-members/${targetUserId}`, {
+        const res = await apiFetch(`${API_BASE}/api/sk/youth-members/${targetUserId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -559,7 +560,7 @@ const YouthProfilesPage = () => {
         toast.success("Youth profile updated")
         logActivity({
           title: "Youth Profile Updated",
-          description: `Updated profile of ${nextFirstName} ${nextLastName}.`,
+          description: `Updated profile of ${selectedProfile.email}.`,
           action: "update_youth_member",
           entity_type: "youth_member",
         })
@@ -603,12 +604,12 @@ const YouthProfilesPage = () => {
         </p>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          className="bg-white flex-1 px-4 py-3 rounded-sm focus:outline-0 border border-gray-200"
+          className="bg-white flex-1 min-w-0 px-4 py-3 rounded-sm focus:outline-0 border border-gray-200"
           placeholder="Search by name, email, or barangay"
         />
 
@@ -618,7 +619,7 @@ const YouthProfilesPage = () => {
             setStatusFilter(value as "All" | "Active" | "Pending" | "Declined" | "Suspended")
           }
         >
-          <SelectTrigger className="w-40 h-12.5! bg-white! border border-gray-200 rounded-sm px-4">
+          <SelectTrigger className="w-40 h-12.5! bg-white! border border-gray-200 rounded-sm px-4 shrink-0">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -631,8 +632,8 @@ const YouthProfilesPage = () => {
         </Select>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-theme-card-white shadow-sm">
-        <div className="p-2">
+      <div className="w-full overflow-hidden rounded-3xl border border-slate-200/80 bg-theme-card-white shadow-sm">
+        <div className="p-2 overflow-x-auto">
           {loading ? (
             <div className="flex items-center justify-center py-16 gap-3 text-gray-500">
               <Spinner className="size-5" />
@@ -643,7 +644,7 @@ const YouthProfilesPage = () => {
               <p className="text-sm text-red-500">{error}</p>
             </div>
           ) : (
-            <Table>
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
@@ -682,6 +683,7 @@ const YouthProfilesPage = () => {
                                   disabled={processingId === profile.id}
                                   onClick={() => handleModeration(profile, "approve")}
                                 >
+                                  <BadgeCheckIcon />
                                   {processingId === profile.id ? "Approving..." : "Approve"}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
@@ -689,16 +691,19 @@ const YouthProfilesPage = () => {
                                   disabled={processingId === profile.id}
                                   onClick={() => handleModeration(profile, "decline")}
                                 >
+                                  <UserXIcon />
                                   {processingId === profile.id ? "Declining..." : "Decline"}
                                 </DropdownMenuItem>
                               </>
                             ) : profile.status === "active" ? (
                               <>
                                 <DropdownMenuItem onClick={() => handleViewProfile(profile)}>
+                                  <EyeIcon />
                                   View
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={() => handleOpenEditProfile(profile)}>
+                                  <PencilIcon />
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
@@ -707,12 +712,14 @@ const YouthProfilesPage = () => {
                                   disabled={processingId === profile.id}
                                   onClick={() => handleOpenSuspendProfile(profile)}
                                 >
+                                  <UserMinusIcon />
                                   {processingId === profile.id ? "Suspending..." : "Suspend"}
                                 </DropdownMenuItem>
                               </>
                             ) : (
                               <>
                                 <DropdownMenuItem onClick={() => handleViewProfile(profile)}>
+                                  <EyeIcon />
                                   View
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
@@ -720,6 +727,7 @@ const YouthProfilesPage = () => {
                                   disabled={processingId === profile.id}
                                   onClick={() => handleOpenReactivateProfile(profile)}
                                 >
+                                  <RefreshCwIcon />
                                   {processingId === profile.id ? "Reactivating..." : "Reactivate"}
                                 </DropdownMenuItem>
                               </>

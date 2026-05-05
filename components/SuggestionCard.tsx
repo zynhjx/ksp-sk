@@ -15,6 +15,7 @@ type SuggestionCardProps = {
     description: string
     suggestedSolution: string
     location: string
+    createdAt?: string
   }
   canModify?: boolean
   onView?: (id: string) => void
@@ -97,6 +98,12 @@ const SuggestionCard = ({
             {current.suggestedSolution}
           </p>
         </div>
+
+        {current.createdAt && (
+          <p className="text-xs text-gray-400">
+            Submitted {new Date(current.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+          </p>
+        )}
 
         {/* Divider */}
         <hr className="border-gray-100" />

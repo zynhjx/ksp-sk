@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react"
 import { useSidebar } from "@/context/SidebarContext"
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from "next/navigation"
@@ -26,6 +27,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { CircleUser, LogOutIcon } from "lucide-react"
+import Image from "next/image"
+import ProfileDialog from "@/components/ProfileDialog"
 
 const toTitleCase = (str: string = "") => {
   return str
@@ -45,6 +48,7 @@ const MobileHeader = () => {
     ? `${toTitleCase(user.first_name)} ${toTitleCase(user.last_name)}`.trim()
     : "SK Official"
   const userEmail = user?.email || "No email available"
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -64,16 +68,27 @@ const MobileHeader = () => {
   }
 
   return (
+    <>
     <div className="md:hidden fixed bg-theme-white border-b border-gray-300 top-0 right-0 left-0 h-18.75 flex items-center justify-between pr-4">
-      <div className="flex items-center w-18 justify-center">
-        <button onClick={() => toggleSidebar()}
-          className={twMerge(
-            "p-3 cursor-pointer hover:bg-slate-100 rounded-2xl border-none",
-            isOpen && "ml-auto"
-          )
-        }>
-          <Menu color="#1e40af" size={24}/>
-        </button>
+      <div className="flex items-center">
+        <div className="flex items-center w-18 justify-center">
+          <button onClick={() => toggleSidebar()}
+            className={twMerge(
+              "p-3 cursor-pointer hover:bg-slate-100 rounded-2xl border-none",
+              isOpen && "ml-auto"
+            )
+          }>
+            <Menu color="#1e40af" size={24}/>
+          </button>
+        </div>
+        <Image
+          src="/LogoTextDark.svg"
+          alt="KSP Logo"
+          width={90}
+          height={28}
+          className="-ml-2 h-auto"
+          priority
+        />
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -92,7 +107,7 @@ const MobileHeader = () => {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuItem className="p-2" onSelect={() => router.push("/profile")}><CircleUser /> Profile</DropdownMenuItem>
+            <DropdownMenuItem className="p-2" onSelect={() => setIsProfileOpen(true)}><CircleUser /> Profile</DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
@@ -128,6 +143,9 @@ const MobileHeader = () => {
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
+
+    <ProfileDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
+  </>
   )
 }
 

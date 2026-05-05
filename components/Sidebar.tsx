@@ -42,6 +42,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import ProfileDialog from "@/components/ProfileDialog"
 
 const toTitleCase = (str: string = "") => {
   return str
@@ -81,6 +82,7 @@ const Sidebar = () => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(max-width: 1280px)").matches;
   });
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1280px)");
@@ -113,6 +115,7 @@ const Sidebar = () => {
   };
 
   return (
+    <>
     <aside className={twMerge(
       "overflow-visible absolute top-0 bottom-0 left-0 xl:relative bg-theme-white text-black box-border flex flex-col z-50",
       isOpen ? "w-70" : "w-18",
@@ -207,7 +210,7 @@ const Sidebar = () => {
                   </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuItem className="p-2" onSelect={() => router.push("/profile")}><CircleUser /> Profile</DropdownMenuItem>
+              <DropdownMenuItem className="p-2" onSelect={() => setIsProfileOpen(true)}><CircleUser /> Profile</DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -246,6 +249,9 @@ const Sidebar = () => {
       </footer>
 
     </aside>
+
+    <ProfileDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
+  </>
   )
 }
 export default Sidebar

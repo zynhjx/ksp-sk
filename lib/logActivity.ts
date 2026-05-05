@@ -1,3 +1,5 @@
+import { apiFetch } from "@/lib/apiFetch"
+
 const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL
 
 type LogActivityPayload = {
@@ -14,7 +16,7 @@ type LogActivityPayload = {
 export function logActivity(payload: LogActivityPayload): void {
   if (!API_BASE) return
 
-  void fetch(`${API_BASE}/api/sk/logs`, {
+  void apiFetch(`${API_BASE}/api/sk/logs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -2,6 +2,7 @@
 
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { apiFetch } from "@/lib/apiFetch"
 import ProgramCard from "@/components/ProgramCard"
 import EmptyState from "@/components/EmptyState"
 import { MapPin } from "lucide-react"
@@ -202,7 +203,7 @@ const Programs = () => {
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/sk/programs`, {
+        const res = await apiFetch(`${API_BASE}/api/sk/programs`, {
           method: "GET",
           headers: {
             "x-app-type": "sk",
@@ -304,7 +305,7 @@ const Programs = () => {
     try {
       setIsCreating(true)
 
-      const res = await fetch(`${API_BASE}/api/sk/programs`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/programs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -435,7 +436,7 @@ const Programs = () => {
     try {
       setIsUpdating(true)
 
-      const res = await fetch(`${API_BASE}/api/sk/programs/${encodeURIComponent(String(selectedProgram.id))}`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/programs/${encodeURIComponent(String(selectedProgram.id))}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -517,7 +518,7 @@ const Programs = () => {
     try {
       setIsDeleting(true)
 
-      const res = await fetch(`${API_BASE}/api/sk/programs/${encodeURIComponent(String(selectedProgram.id))}`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/programs/${encodeURIComponent(String(selectedProgram.id))}`, {
         method: "DELETE",
         headers: {
           "x-app-type": "sk",
@@ -735,16 +736,16 @@ const Programs = () => {
           </Dialog>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-white flex-1 px-4 py-3 rounded-sm focus:outline-0 border border-gray-200"
+            className="bg-white flex-1 min-w-0 px-4 py-3 rounded-sm focus:outline-0 border border-gray-200"
             placeholder="Search by program name"
           />
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             {filterComponents}
           </div>
         </div>
@@ -892,7 +893,7 @@ const Programs = () => {
           if (!open) setSelectedProgram(null)
         }}
       >
-        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden" aria-describedby={undefined}>
           <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
             <DialogTitle>{selectedProgram?.name ?? "Program Details"}</DialogTitle>
           </DialogHeader>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { apiFetch } from "@/lib/apiFetch"
 import SuggestionCard from "@/components/SuggestionCard"
 import EmptyState from "@/components/EmptyState"
 import { MapPin } from "lucide-react"
@@ -30,6 +31,7 @@ type Suggestion = {
   description: string
   suggestedSolution: string
   location: string
+  createdAt: string
 }
 
 type RawSuggestion = {
@@ -79,6 +81,7 @@ const Suggestions = () => {
     description: String(value.description || "No description provided."),
     suggestedSolution: String(value.suggested_solution || "No suggested solution provided."),
     location: String(value.location || "Unspecified"),
+    createdAt: String(value.created_at || ""),
   })
 
   const fetchSuggestions = useCallback(
@@ -94,7 +97,7 @@ const Suggestions = () => {
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/sk/suggestions`, {
+        const res = await apiFetch(`${API_BASE}/api/sk/suggestions`, {
           method: "GET",
           headers: {
             "x-app-type": "sk",
@@ -163,10 +166,11 @@ const Suggestions = () => {
       return
     }
 
+    const suggestionTitle = suggestions.find((s) => s.id === id)?.title ?? "Unknown Suggestion"
     setDeletingSuggestionId(id)
 
     try {
-      const res = await fetch(`${API_BASE}/api/sk/suggestions/${encodeURIComponent(id)}`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/suggestions/${encodeURIComponent(id)}`, {
         method: "DELETE",
         headers: {
           "x-app-type": "sk",
@@ -198,7 +202,7 @@ const Suggestions = () => {
       toast.success(body.message || "Suggestion deleted successfully")
       logActivity({
         title: "Suggestion Deleted",
-        description: `Deleted suggestion (ID: ${deletedId}).`,
+        description: `Deleted suggestion "${suggestionTitle}".`,
         action: "delete_suggestion",
         entity_type: "suggestion",
       })
@@ -287,7 +291,7 @@ const Suggestions = () => {
           if (!open) setViewSuggestion(null)
         }}
       >
-        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden" aria-describedby={undefined}>
           <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
             <DialogTitle>{viewSuggestion?.title ?? "Suggestion Details"}</DialogTitle>
           </DialogHeader>
@@ -304,6 +308,11 @@ const Suggestions = () => {
                 <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{viewSuggestion.suggestedSolution}</p>
               </div>
 
+              {viewSuggestion.createdAt && (
+                <p className="text-xs text-gray-400">
+                  Submitted {new Date(viewSuggestion.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" })}
+                </p>
+              )}
             </div>
           ) : null}
 

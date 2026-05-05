@@ -2,6 +2,7 @@
 
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { apiFetch } from "@/lib/apiFetch"
 import AnnouncementCard from "@/components/AnnouncementCard"
 import EmptyState from "@/components/EmptyState"
 import { Button } from "@/components/ui/button"
@@ -128,7 +129,7 @@ const Announcements = () => {
       }
 
       try {
-        const res = await fetch(`${API_BASE}/api/sk/announcements`, {
+        const res = await apiFetch(`${API_BASE}/api/sk/announcements`, {
           method: "GET",
           headers: {
             "x-app-type": "sk",
@@ -202,7 +203,7 @@ const Announcements = () => {
     try {
       setIsCreating(true)
 
-      const res = await fetch(`${API_BASE}/api/sk/announcements`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/announcements`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -289,7 +290,7 @@ const Announcements = () => {
     if (!selectedAnnouncement) return
     setIsDeleting(true)
     try {
-      const res = await fetch(`${API_BASE}/api/sk/announcements/${selectedAnnouncement.id}`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/announcements/${selectedAnnouncement.id}`, {
         method: "DELETE",
         headers: { "x-app-type": "sk" },
         credentials: "include",
@@ -394,16 +395,16 @@ const Announcements = () => {
           </Dialog>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-white flex-1 px-4 py-3 rounded-sm focus:outline-0 border border-gray-200"
+            className="bg-white flex-1 min-w-0 px-4 py-3 rounded-sm focus:outline-0 border border-gray-200"
             placeholder="Search announcements..."
           />
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as AnnouncementType | "all")}>
               <SelectTrigger className="w-40 h-12.5! bg-white! border border-gray-200 rounded-sm px-4">
                 <SelectValue placeholder="Type" />
@@ -453,7 +454,7 @@ const Announcements = () => {
           if (!open) setSelectedAnnouncement(null)
         }}
       >
-        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-lg flex flex-col max-h-[85vh] p-0 gap-0 overflow-hidden" aria-describedby={undefined}>
           <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
             <DialogTitle className="leading-snug max-h-[calc(5*1.375rem)] overflow-y-auto">
               {selectedAnnouncement?.title ?? "Announcement"}

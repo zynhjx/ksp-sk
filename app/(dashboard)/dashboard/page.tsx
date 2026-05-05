@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { apiFetch } from "@/lib/apiFetch"
 import Title from "@/components/Title"
 import DashboardGraphicOrganizer from "@/components/DashboardGraphicOrganizer"
 import { useAuth } from "@/context/AuthContext"
@@ -249,7 +250,7 @@ const Dashboard = () => {
     try {
       setLoadingCounts(true)
 
-      const res = await fetch(`${API_BASE}/api/sk/dashboard-counts`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/dashboard-counts`, {
         method: "GET",
         headers: {
           "x-app-type": "sk",
@@ -296,7 +297,7 @@ const Dashboard = () => {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/sk/age-distribution`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/age-distribution`, {
         method: "GET",
         headers: {
           "x-app-type": "sk",
@@ -343,7 +344,7 @@ const Dashboard = () => {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/sk/employment-status-distribution`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/employment-status-distribution`, {
         method: "GET",
         headers: {
           "x-app-type": "sk",
@@ -390,7 +391,7 @@ const Dashboard = () => {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/sk/education-level-distribution`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/education-level-distribution`, {
         method: "GET",
         headers: {
           "x-app-type": "sk",
@@ -450,7 +451,7 @@ const Dashboard = () => {
   const fetchGenderDistribution = useCallback(async () => {
     if (!API_BASE) return
     try {
-      const res = await fetch(`${API_BASE}/api/sk/gender-distribution`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/gender-distribution`, {
         method: "GET",
         headers: { "x-app-type": "sk" },
         credentials: "include",

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { apiFetch } from "@/lib/apiFetch"
 import {
   BadgeCheckIcon,
   ClipboardListIcon,
@@ -153,7 +154,7 @@ const ActivityLogs = () => {
     setLoading(true)
 
     try {
-      const res = await fetch(`${API_BASE}/api/sk/logs`, {
+      const res = await apiFetch(`${API_BASE}/api/sk/logs`, {
         method: "GET",
         headers: { "x-app-type": "sk" },
         credentials: "include",
